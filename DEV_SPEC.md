@@ -1953,7 +1953,7 @@ dashboard:
 | B4   | VectorStore 抽象接口与工厂         | [x] | 2025-03-01 | BaseVectorStore upsert/query 契约、VectorStoreFactory、契约测试 |
 | B5   | Reranker 抽象接口与工厂（含 None 回退） | [x] | 2025-03-01 | BaseReranker、NoneReranker、RerankerFactory，backend=none 不改变排序 |
 | B6   | Evaluator 抽象接口与工厂           | [x] | 2025-03-01 | BaseEvaluator、CustomEvaluator(hit_rate/mrr)、EvaluatorFactory |
-| B7.1 | OpenAI-Compatible LLM 实现    | [ ] | -    |     |
+| B7.1 | OpenAI-Compatible LLM 实现    | [x] | 2025-03-01 | OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试 |
 | B7.2 | Ollama LLM 实现               | [ ] | -    |     |
 | B7.3 | OpenAI & Azure Embedding 实现 | [ ] | -    |     |
 | B7.4 | Ollama Embedding 实现         | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 6     | 38%    |
+| 阶段 B   | 16     | 7     | 44%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2228,6 +2228,7 @@ dashboard:
 
 ### B7.1：OpenAI-Compatible LLM（OpenAI/Azure/DeepSeek）
 
+- **状态**：已完成（2025-03-01）。备注：OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试。
 - **目标**：补齐 OpenAI-compatible 的 LLM 实现，确保通过 `LLMFactory` 可创建并可被 mock 测试。
 - **修改文件**：
   - `src/libs/llm/openai_llm.py`

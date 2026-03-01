@@ -22,9 +22,13 @@ except ImportError:
 
 @dataclass(frozen=True)
 class LlmSettings:
-    """LLM 配置节。"""
+    """LLM 配置节（B7.1 起支持 api_key/base_url/azure 等）。"""
     provider: str
     model: str
+    api_key: str = ""
+    base_url: str = ""
+    azure_endpoint: str = ""
+    api_version: str = "2024-02-15-preview"
 
 
 @dataclass(frozen=True)
@@ -153,6 +157,10 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
     llm = LlmSettings(
         provider=str(data["llm"]["provider"]),
         model=str(data["llm"]["model"]),
+        api_key=str(data["llm"].get("api_key", "")),
+        base_url=str(data["llm"].get("base_url", "")),
+        azure_endpoint=str(data["llm"].get("azure_endpoint", "")),
+        api_version=str(data["llm"].get("api_version", "2024-02-15-preview")),
     )
     embedding = EmbeddingSettings(
         provider=str(data["embedding"]["provider"]),
