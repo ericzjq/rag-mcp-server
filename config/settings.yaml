@@ -20,6 +20,11 @@ retrieval:
 rerank:
   provider: none
 
+splitter:
+  provider: recursive
+  chunk_size: 512
+  chunk_overlap: 50
+
 evaluation:
   provider: ragas
 

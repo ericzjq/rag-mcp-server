@@ -26,6 +26,7 @@ def test_load_settings_from_default_path() -> None:
     assert settings.embedding.model == "text-embedding-3-small"
     assert settings.vector_store.provider == "chroma"
     assert settings.observability.log_level == "INFO"
+    assert settings.splitter.provider == "recursive"
 
 
 def test_validate_settings_accepts_valid_settings() -> None:
@@ -69,6 +70,10 @@ retrieval:
   rerank_top_m: 20
 rerank:
   provider: none
+splitter:
+  provider: recursive
+  chunk_size: 512
+  chunk_overlap: 50
 evaluation:
   provider: ragas
 observability:

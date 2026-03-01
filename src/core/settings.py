@@ -55,6 +55,14 @@ class RerankSettings:
 
 
 @dataclass(frozen=True)
+class SplitterSettings:
+    """Splitter 配置节（B3）。"""
+    provider: str
+    chunk_size: int
+    chunk_overlap: int
+
+
+@dataclass(frozen=True)
 class EvaluationSettings:
     """Evaluation 配置节。"""
     provider: str
@@ -75,6 +83,7 @@ class Settings:
     vector_store: VectorStoreSettings
     retrieval: RetrievalSettings
     rerank: RerankSettings
+    splitter: SplitterSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
 
@@ -93,6 +102,9 @@ _REQUIRED_PATHS: List[tuple] = [
     ("retrieval", "top_k"),
     ("retrieval", "rerank_top_m"),
     ("rerank", "provider"),
+    ("splitter", "provider"),
+    ("splitter", "chunk_size"),
+    ("splitter", "chunk_overlap"),
     ("evaluation", "provider"),
     ("observability", "log_level"),
     ("observability", "traces_path"),
@@ -155,6 +167,11 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
         rerank_top_m=int(data["retrieval"]["rerank_top_m"]),
     )
     rerank = RerankSettings(provider=str(data["rerank"]["provider"]))
+    splitter = SplitterSettings(
+        provider=str(data["splitter"]["provider"]),
+        chunk_size=int(data["splitter"]["chunk_size"]),
+        chunk_overlap=int(data["splitter"]["chunk_overlap"]),
+    )
     evaluation = EvaluationSettings(provider=str(data["evaluation"]["provider"]))
     observability = ObservabilitySettings(
         log_level=str(data["observability"]["log_level"]),
@@ -166,6 +183,7 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
         vector_store=vector_store,
         retrieval=retrieval,
         rerank=rerank,
+        splitter=splitter,
         evaluation=evaluation,
         observability=observability,
     )

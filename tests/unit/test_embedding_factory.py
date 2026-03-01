@@ -14,6 +14,7 @@ from core.settings import (
     RerankSettings,
     RetrievalSettings,
     Settings,
+    SplitterSettings,
     VectorStoreSettings,
 )
 from libs.embedding.base_embedding import BaseEmbedding
@@ -31,6 +32,7 @@ def _make_settings(
         vector_store=VectorStoreSettings(provider="chroma", persist_directory="data/chroma"),
         retrieval=RetrievalSettings(top_k=10, rerank_top_m=20),
         rerank=RerankSettings(provider="none"),
+        splitter=SplitterSettings(provider="recursive", chunk_size=512, chunk_overlap=50),
         evaluation=EvaluationSettings(provider="ragas"),
         observability=ObservabilitySettings(log_level="INFO", traces_path="logs/traces.jsonl"),
     )
