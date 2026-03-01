@@ -1955,7 +1955,7 @@ dashboard:
 | B6   | Evaluator 抽象接口与工厂           | [x] | 2025-03-01 | BaseEvaluator、CustomEvaluator(hit_rate/mrr)、EvaluatorFactory |
 | B7.1 | OpenAI-Compatible LLM 实现    | [x] | 2025-03-01 | OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试 |
 | B7.2 | Ollama LLM 实现               | [x] | 2025-03-01 | ollama_llm.py、默认 base_url、工厂注册、mock 测试与可读错误 |
-| B7.3 | OpenAI & Azure Embedding 实现 | [ ] | -    |     |
+| B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试 |
 | B7.4 | Ollama Embedding 实现         | [ ] | -    |     |
 | B7.5 | Recursive Splitter 默认实现     | [ ] | -    |     |
 | B7.6 | ChromaStore 默认实现            | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 8     | 50%    |
+| 阶段 B   | 16     | 9     | 56%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2254,6 +2254,7 @@ dashboard:
 
 ### B7.3：OpenAI & Azure Embedding 实现
 
+- **状态**：已完成（2025-03-01）。备注：EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试。
 - **目标**：补齐 `openai_embedding.py` 和 `azure_embedding.py`，支持 OpenAI 官方 API 和 Azure OpenAI 服务的 Embedding 调用，支持批量 `embed(texts)`，并可被 mock 测试。
 - **修改文件**：
   - `src/libs/embedding/openai_embedding.py`

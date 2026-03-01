@@ -33,9 +33,13 @@ class LlmSettings:
 
 @dataclass(frozen=True)
 class EmbeddingSettings:
-    """Embedding 配置节。"""
+    """Embedding 配置节（B7.3 起支持 api_key/base_url/azure 等）。"""
     provider: str
     model: str
+    api_key: str = ""
+    base_url: str = ""
+    azure_endpoint: str = ""
+    api_version: str = "2024-02-15-preview"
 
 
 @dataclass(frozen=True)
@@ -165,6 +169,10 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
     embedding = EmbeddingSettings(
         provider=str(data["embedding"]["provider"]),
         model=str(data["embedding"]["model"]),
+        api_key=str(data["embedding"].get("api_key", "")),
+        base_url=str(data["embedding"].get("base_url", "")),
+        azure_endpoint=str(data["embedding"].get("azure_endpoint", "")),
+        api_version=str(data["embedding"].get("api_version", "2024-02-15-preview")),
     )
     vector_store = VectorStoreSettings(
         provider=str(data["vector_store"]["provider"]),
