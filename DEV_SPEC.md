@@ -1971,7 +1971,7 @@ dashboard:
 | C1   | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2025-03-01 | types.py、metadata.images、[IMAGE:id]、to_dict/from_dict |
 | C2   | 文件完整性检查（SHA256）                         | [x] | 2025-03-01 | FileIntegrityChecker、SQLiteIntegrityChecker、WAL、should_skip/mark |
 | C3   | Loader 抽象基类与 PDF Loader                 | [x] | 2025-03-01 | BaseLoader、PdfLoader、pypdf、[IMAGE:id]、metadata.images、降级 |
-| C4   | Splitter 集成（调用 Libs）                    | [ ] | -    |     |
+| C4   | Splitter 集成（调用 Libs）                    | [x] | 2025-03-01 | DocumentChunker、chunk_id、metadata/chunk_index、source_ref、FakeSplitter 测试 |
 | C5   | Transform 基类 + ChunkRefiner             | [ ] | -    |     |
 | C6   | MetadataEnricher                        | [ ] | -    |     |
 | C7   | ImageCaptioner                          | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 3     | 20%     |
+| 阶段 C   | 15     | 4     | 27%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **22** | **32%** |
+| **总计** | **68** | **23** | **34%** |
 
 
 ---
@@ -2445,6 +2445,7 @@ dashboard:
 
 ### C4：Splitter 集成（调用 Libs）
 
+- **状态**：已完成（2025-03-01）。备注：DocumentChunker、split_document、_generate_chunk_id/_inherit_metadata、SplitterFactory、FakeSplitter 单元测试。
 - **目标**：实现 Chunking 模块作为 `libs.splitter` 和 Ingestion Pipeline 之间的**适配器层**，完成 Document→Chunks 的业务对象转换。
 - **核心职责（DocumentChunker 相比 libs.splitter 的增值）**：
   - **职责边界说明**：
