@@ -1,0 +1,28 @@
+# 主配置文件 (最小可解析占位，A3 补齐校验)
+# LLM / Embedding / VectorStore 等配置在后续阶段补充
+
+llm:
+  provider: openai
+  model: gpt-4o-mini
+
+embedding:
+  provider: openai
+  model: text-embedding-3-small
+
+vector_store:
+  provider: chroma
+  persist_directory: data/chroma
+
+retrieval:
+  top_k: 10
+  rerank_top_m: 20
+
+rerank:
+  provider: none
+
+evaluation:
+  provider: ragas
+
+observability:
+  log_level: INFO
+  traces_path: logs/traces.jsonl

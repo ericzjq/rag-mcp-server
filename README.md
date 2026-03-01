@@ -36,6 +36,23 @@
 
 ---
 
+## 🛠️ 本地开发（骨架阶段）
+
+```bash
+# 创建虚拟环境并安装（可编辑模式）
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .
+
+# 验证顶层包可导入
+python -c "import mcp_server; import core; import ingestion; import libs; import observability"
+
+# 运行入口（当前为占位，A3 起加载配置）
+python main.py
+```
+
+---
+
 ## 📄 License
 
 MIT

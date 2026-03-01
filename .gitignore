@@ -1,0 +1,47 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment and secrets
+.env
+.env.local
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build and dist
+build/
+dist/
+*.egg-info/
+*.egg
+
+# pytest and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data and runtime (per DEV_SPEC)
+data/documents/
+data/images/
+data/db/*.db
+data/chroma/
+data/bm25/
+cache/
+logs/*.log
+logs/*.jsonl
+
+# Spec sync hash (optional: track to avoid unnecessary syncs)
+# .github/skills/spec-sync/.spec_hash
