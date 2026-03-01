@@ -1970,7 +1970,7 @@ dashboard:
 | ---- | --------------------------------------- | --- | ---- | --- |
 | C1   | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2025-03-01 | types.py、metadata.images、[IMAGE:id]、to_dict/from_dict |
 | C2   | 文件完整性检查（SHA256）                         | [x] | 2025-03-01 | FileIntegrityChecker、SQLiteIntegrityChecker、WAL、should_skip/mark |
-| C3   | Loader 抽象基类与 PDF Loader                 | [ ] | -    |     |
+| C3   | Loader 抽象基类与 PDF Loader                 | [x] | 2025-03-01 | BaseLoader、PdfLoader、pypdf、[IMAGE:id]、metadata.images、降级 |
 | C4   | Splitter 集成（调用 Libs）                    | [ ] | -    |     |
 | C5   | Transform 基类 + ChunkRefiner             | [ ] | -    |     |
 | C6   | MetadataEnricher                        | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 2     | 13%     |
+| 阶段 C   | 15     | 3     | 20%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **21** | **31%** |
+| **总计** | **68** | **22** | **32%** |
 
 
 ---
@@ -2420,6 +2420,7 @@ dashboard:
 
 ### C3：Loader 抽象基类与 PDF Loader 壳子
 
+- **状态**：已完成（2025-03-01）。备注：BaseLoader、PdfLoader、pypdf 文本/图片提取、data/images/{doc_hash}、[IMAGE:id] 与 metadata.images（C1）、图片失败降级、test_loader_pdf_contract。
 - **目标**：在Libs中定义 `BaseLoader`，并实现 `PdfLoader` 的最小行为。
 - **修改文件**：
   - `src/libs/loader/base_loader.py`
