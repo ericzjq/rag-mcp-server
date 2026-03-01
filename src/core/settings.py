@@ -85,8 +85,13 @@ class ObservabilitySettings:
 
 @dataclass(frozen=True)
 class VisionLlmSettings:
-    """Vision LLM 配置节（B8，可选）。"""
+    """Vision LLM 配置节（B8，可选）。B9 Azure：azure_endpoint、api_version、deployment_name、api_key、max_image_size。"""
     provider: str
+    api_key: str = ""
+    azure_endpoint: str = ""
+    api_version: str = "2024-02-15-preview"
+    deployment_name: str = ""
+    max_image_size: int = 2048
 
 
 @dataclass(frozen=True)
@@ -202,7 +207,15 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
     )
     vision_llm = None
     if data.get("vision_llm") and isinstance(data["vision_llm"], dict) and data["vision_llm"].get("provider"):
-        vision_llm = VisionLlmSettings(provider=str(data["vision_llm"]["provider"]))
+        vl = data["vision_llm"]
+        vision_llm = VisionLlmSettings(
+            provider=str(vl["provider"]),
+            api_key=str(vl.get("api_key", "")),
+            azure_endpoint=str(vl.get("azure_endpoint", "")),
+            api_version=str(vl.get("api_version", "2024-02-15-preview")),
+            deployment_name=str(vl.get("deployment_name", "")),
+            max_image_size=int(vl.get("max_image_size", 2048)),
+        )
     return Settings(
         llm=llm,
         embedding=embedding,

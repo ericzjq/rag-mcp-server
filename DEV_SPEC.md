@@ -1,5 +1,3 @@
-
-
 # Developer Specification (DEV_SPEC)
 
 > 版本：0.1 — 文档结构草案
@@ -214,26 +212,26 @@
       - **表结构**：
       - **查询逻辑**：`SELECT status FROM ingestion_history WHERE file_hash = ? AND status = 'success'`
       - **替换路径**：后续可升级为 Redis（分布式缓存）或 PostgreSQL（企业级中心化存储）
-  > **📌 持久化存储架构统一说明**
-  >
-  > 本项目在多个核心模块中采用 **SQLite** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
-  >
-  >
-  > | 存储模块           | 数据库文件                          | 用途                              | 表结构关键字段                               |
-  > | -------------- | ------------------------------ | ------------------------------- | ------------------------------------- |
-  > | **文件完整性检查**    | `data/db/ingestion_history.db` | 记录已处理文件的 SHA256 哈希，实现增量摄取       | `file_hash`, `status`, `processed_at` |
-  > | **图片索引映射**     | `data/db/image_index.db`       | 记录 image_id → 文件路径映射，支持图片检索与引用  | `image_id`, `file_path`, `collection` |
-  > | **BM25 索引元数据** | `data/db/bm25/`                | 存储倒排索引和 IDF 统计信息（未来可扩展用 SQLite） | 当前使用 pickle，可迁移至 SQLite               |
-  >
-  >
-  > **设计优势**：
-  >
-  > - **零依赖部署**：无需安装 MySQL/PostgreSQL 等数据库服务，`pip install` 即可运行
-  > - **并发安全**：WAL (Write-Ahead Logging) 模式支持多进程安全读写
-  > - **持久化保证**：摄取历史和索引映射在进程重启后自动恢复，避免重复计算
-  > - **架构一致性**：所有 SQLite 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
-  >
-  > **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 SQLite 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
+        > **📌 持久化存储架构统一说明**
+        >
+        > 本项目在多个核心模块中采用 **SQLite** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
+        >
+        >
+        > | 存储模块           | 数据库文件                          | 用途                              | 表结构关键字段                               |
+        > | -------------- | ------------------------------ | ------------------------------- | ------------------------------------- |
+        > | **文件完整性检查**    | `data/db/ingestion_history.db` | 记录已处理文件的 SHA256 哈希，实现增量摄取       | `file_hash`, `status`, `processed_at` |
+        > | **图片索引映射**     | `data/db/image_index.db`       | 记录 image_id → 文件路径映射，支持图片检索与引用  | `image_id`, `file_path`, `collection` |
+        > | **BM25 索引元数据** | `data/db/bm25/`                | 存储倒排索引和 IDF 统计信息（未来可扩展用 SQLite） | 当前使用 pickle，可迁移至 SQLite               |
+        >
+        >
+        > **设计优势**：
+        >
+        > - **零依赖部署**：无需安装 MySQL/PostgreSQL 等数据库服务，`pip install` 即可运行
+        > - **并发安全**：WAL (Write-Ahead Logging) 模式支持多进程安全读写
+        > - **持久化保证**：摄取历史和索引映射在进程重启后自动恢复，避免重复计算
+        > - **架构一致性**：所有 SQLite 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
+        >
+        > **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 SQLite 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
   - **解析与标准化**：
     - 当前范围：**仅实现 PDF -> canonical Markdown 子集** 的转换。
   - 技术选型（Python PDF -> Markdown）：
@@ -246,7 +244,7 @@
   - Splitter 输入：Loader 产出的 Markdown `Document`。
   - Splitter 输出：若干 `Chunk`（或 Document-like chunks），每个 chunk 必须携带稳定的定位信息与来源信息：`source`, `chunk_index`, `start_offset/end_offset`（或等价定位字段）。
 - Transform & Enrichment（结构转换与深度增强）
-  本阶段是 ETL 管道的核心“智力”环节，负责将 Splitter 产出的非结构化文本块转化为结构化、富语义的智能切片（Smart Chunk）。
+本阶段是 ETL 管道的核心“智力”环节，负责将 Splitter 产出的非结构化文本块转化为结构化、富语义的智能切片（Smart Chunk）。
   - **结构转换 (Structure Transformation)**：将原始的 `String` 类型数据转化为强类型的 `Record/Object`，为下游检索提供字段级支持。
   - **核心增强策略**：
     1. **智能重组 (Smart Chunking & Refinement)**：
@@ -278,7 +276,7 @@
   - 写入时采用 "Upsert"（更新或插入）语义，确保同一文档即使被多次处理，数据库中也永远只有一份最新副本，彻底避免重复索引问题。
   - **原子性保证**：以 Batch 为单位进行事务性写入，确保索引状态的一致性。
 - **文档生命周期管理 (Document Lifecycle Management)**
-    为支持 Dashboard 管理面板中的文档浏览与删除功能，Ingestion 层需要提供完整的文档生命周期管理能力：
+  为支持 Dashboard 管理面板中的文档浏览与删除功能，Ingestion 层需要提供完整的文档生命周期管理能力：
   - **DocumentManager（文档管理器）**：独立于 Pipeline 的文档管理模块（`src/ingestion/document_manager.py`），负责跨存储的协调操作：
     - `list_documents(collection?) -> List[DocumentInfo]`：列出已摄入文档及其统计信息（chunk 数、图片数、摄入时间）。
     - `get_document_detail(doc_id) -> DocumentDetail`：获取单个文档的详细信息（所有 chunk 内容、metadata、关联图片）。
@@ -1935,34 +1933,34 @@ dashboard:
 #### 阶段 A：工程骨架与测试基座
 
 
-| 任务编号 | 任务名称                | 状态  | 完成日期 | 备注  |
-| ---- | ------------------- | --- | ---- | --- |
-| A1   | 初始化目录树与最小可运行入口      | [x] | 2025-03-01 | 目录骨架、main/pyproject/config、五大包可导入 |
-| A2   | 引入 pytest 并建立测试目录约定 | [x] | 2025-03-01 | pytest 基座、test_smoke_imports、fixtures 占位 |
+| 任务编号 | 任务名称                | 状态  | 完成日期       | 备注                                                  |
+| ---- | ------------------- | --- | ---------- | --------------------------------------------------- |
+| A1   | 初始化目录树与最小可运行入口      | [x] | 2025-03-01 | 目录骨架、main/pyproject/config、五大包可导入                   |
+| A2   | 引入 pytest 并建立测试目录约定 | [x] | 2025-03-01 | pytest 基座、test_smoke_imports、fixtures 占位            |
 | A3   | 配置加载与校验（Settings）   | [x] | 2025-03-01 | Settings/load_settings/validate、logger 占位、main 加载配置 |
 
 
 #### 阶段 B：Libs 可插拔层
 
 
-| 任务编号 | 任务名称                        | 状态  | 完成日期 | 备注  |
-| ---- | --------------------------- | --- | ---- | --- |
-| B1   | LLM 抽象接口与工厂                 | [x] | 2025-03-01 | BaseLLM、LLMFactory、Fake 路由测试 |
-| B2   | Embedding 抽象接口与工厂           | [x] | 2025-03-01 | BaseEmbedding、EmbeddingFactory、Fake 稳定向量测试 |
-| B3   | Splitter 抽象接口与工厂            | [x] | 2025-03-01 | BaseSplitter、SplitterFactory、SplitterSettings、Fake 路由测试 |
-| B4   | VectorStore 抽象接口与工厂         | [x] | 2025-03-01 | BaseVectorStore upsert/query 契约、VectorStoreFactory、契约测试 |
+| 任务编号 | 任务名称                        | 状态  | 完成日期       | 备注                                                           |
+| ---- | --------------------------- | --- | ---------- | ------------------------------------------------------------ |
+| B1   | LLM 抽象接口与工厂                 | [x] | 2025-03-01 | BaseLLM、LLMFactory、Fake 路由测试                                 |
+| B2   | Embedding 抽象接口与工厂           | [x] | 2025-03-01 | BaseEmbedding、EmbeddingFactory、Fake 稳定向量测试                   |
+| B3   | Splitter 抽象接口与工厂            | [x] | 2025-03-01 | BaseSplitter、SplitterFactory、SplitterSettings、Fake 路由测试      |
+| B4   | VectorStore 抽象接口与工厂         | [x] | 2025-03-01 | BaseVectorStore upsert/query 契约、VectorStoreFactory、契约测试      |
 | B5   | Reranker 抽象接口与工厂（含 None 回退） | [x] | 2025-03-01 | BaseReranker、NoneReranker、RerankerFactory，backend=none 不改变排序 |
 | B6   | Evaluator 抽象接口与工厂           | [x] | 2025-03-01 | BaseEvaluator、CustomEvaluator(hit_rate/mrr)、EvaluatorFactory |
-| B7.1 | OpenAI-Compatible LLM 实现    | [x] | 2025-03-01 | OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试 |
-| B7.2 | Ollama LLM 实现               | [x] | 2025-03-01 | ollama_llm.py、默认 base_url、工厂注册、mock 测试与可读错误 |
-| B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试 |
-| B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试 |
-| B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试 |
-| B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试 |
-| B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试 |
-| B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | cross_encoder_reranker.py、可注入 scorer、失败回退、mock 测试 |
-| B8   | Vision LLM 抽象接口与工厂集成        | [x] | 2025-03-01 | BaseVisionLLM、ChatResponse、VisionLlmSettings、create_vision_llm、Fake 测试 |
-| B9   | Azure Vision LLM 实现         | [ ] | -    |     |
+| B7.1 | OpenAI-Compatible LLM 实现    | [x] | 2025-03-01 | OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试        |
+| B7.2 | Ollama LLM 实现               | [x] | 2025-03-01 | ollama_llm.py、默认 base_url、工厂注册、mock 测试与可读错误                  |
+| B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试           |
+| B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试   |
+| B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试             |
+| B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试              |
+| B7.7 | LLM Reranker 实现             | [ ] | -          |                                                              |
+| B7.8 | Cross-Encoder Reranker 实现   | [ ] | -          |                                                              |
+| B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -          |                                                              |
+| B9   | Azure Vision LLM 实现         | [x] | 2025-03-01 | AzureVisionLLM、路径/base64、max_image_size、mock 测试        |
 
 
 #### 阶段 C：Ingestion Pipeline MVP
@@ -2068,17 +2066,17 @@ dashboard:
 ### 📈 总体进度
 
 
-| 阶段     | 总任务数   | 已完成   | 进度     |
-| ------ | ------ | ----- | ------ |
-| 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 15    | 94%    |
-| 阶段 C   | 15     | 0     | 0%     |
-| 阶段 D   | 7      | 0     | 0%     |
-| 阶段 E   | 6      | 0     | 0%     |
-| 阶段 F   | 5      | 0     | 0%     |
-| 阶段 G   | 6      | 0     | 0%     |
-| 阶段 H   | 5      | 0     | 0%     |
-| 阶段 I   | 5      | 0     | 0%     |
+| 阶段     | 总任务数   | 已完成   | 进度      |
+| ------ | ------ | ----- | ------- |
+| 阶段 A   | 3      | 3     | 100%    |
+| 阶段 B   | 16     | 13    | 81%     |
+| 阶段 C   | 15     | 0     | 0%      |
+| 阶段 D   | 7      | 0     | 0%      |
+| 阶段 E   | 6      | 0     | 0%      |
+| 阶段 F   | 5      | 0     | 0%      |
+| 阶段 G   | 6      | 0     | 0%      |
+| 阶段 H   | 5      | 0     | 0%      |
+| 阶段 I   | 5      | 0     | 0%      |
 | **总计** | **68** | **9** | **13%** |
 
 
@@ -2093,7 +2091,7 @@ dashboard:
   - `main.py`
   - `pyproject.toml`
   - `README.md`
-  - `.gitignore`（Python 项目标准忽略规则：`__pycache_`_、`.venv`、`.env`、`*.pyc`、IDE 配置等）
+  - `.gitignore`（Python 项目标准忽略规则：`__pycache`__、`.venv`、`.env`、`*.pyc`、IDE 配置等）
   - `src/**/__init__.py`（按目录树补齐）
   - `config/settings.yaml`（最小可解析配置）
   - `config/prompts/image_captioning.txt`（可先放占位内容，后续阶段补充 Prompt）
@@ -2311,7 +2309,6 @@ dashboard:
 
 ### B7.7：LLM Reranker（读取 rerank prompt）
 
-- **状态**：已完成（2025-03-01）。备注：llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试。
 - **目标**：补齐 `llm_reranker.py`，读取 `config/prompts/rerank.txt` 构造 prompt（测试中可注入替代文本），并可在失败时返回可回退信号。
 - **修改文件**：
   - `src/libs/reranker/llm_reranker.py`
@@ -2323,7 +2320,6 @@ dashboard:
 
 ### B7.8：Cross-Encoder Reranker（本地/托管模型，占位可跑）
 
-- **状态**：已完成（2025-03-01）。备注：cross_encoder_reranker.py、可注入 scorer、失败回退、mock 测试。
 - **目标**：补齐 `cross_encoder_reranker.py`，支持对 Top-M candidates 打分排序；测试中用 mock scorer 保证 deterministic。
 - **修改文件**：
   - `src/libs/reranker/cross_encoder_reranker.py`
@@ -2335,7 +2331,6 @@ dashboard:
 
 ### B8：Vision LLM 抽象接口与工厂集成
 
-- **状态**：已完成（2025-03-01）。备注：BaseVisionLLM、ChatResponse、VisionLlmSettings、create_vision_llm、Fake 测试。
 - **目标**：定义 `BaseVisionLLM` 抽象接口，扩展 `LLMFactory` 支持 Vision LLM 创建，为 C7 的 ImageCaptioner 提供底层抽象。
 - **修改文件**：
   - `src/libs/llm/base_vision_llm.py`
@@ -2352,6 +2347,7 @@ dashboard:
 
 ### B9：Azure Vision LLM 实现
 
+- **状态**：已完成（2025-03-01）。备注：AzureVisionLLM、路径/base64、VisionLlmSettings 扩展、max_image_size 压缩、openai.AzureOpenAI mock 测试。
 - **目标**：实现 `AzureVisionLLM`，支持通过 Azure OpenAI 调用 GPT-4o/GPT-4-Vision-Preview 进行图像理解。
 - **修改文件**：
   - `src/libs/llm/azure_vision_llm.py`
@@ -3234,6 +3230,29 @@ dashboard:
   - `python scripts/evaluate.py` 输出评估指标
 - **测试方法**：手动全链路走通 + `pytest -q` 全量测试。
 
+### I6：项目总结
+- **目标**：对整个项目内容进行总结，并输出为应聘AI agent应用开发岗位简历中的项目经历，包含项目职责，以及主要工作两部分。
+- **修改文件**：`INTERVIEW.md`(新增)
+- **验收标准**：
+  - 项目总结 包含以下内容：
+  - **项目职责**：用两到三句话简短的概括该项目内容，实现了哪些能力，用到了哪些技术
+  - **主要工作**：分三个部分描述项目完成的主要工作，用到了哪些技术，解决了哪些问题，实现了哪些功能，取得了怎样的效果
+- **测试方法**：假设你是一位专业的面试官，需要按照以下岗位JD招聘人才，再阅读一遍`INTERVIEW.md`，评估是否有遗漏或不足，进行补充修改。
+  - 岗位JD:职位描述
+    - 1、设计和实现基于LLM的智能体核心架构，包括任务规划、对话管理、意图识别和流程工程；
+    - 2、负责智能体平台（AI创作）的后端服务开发与优化，打造高性能、高可用的分布式系统；
+    - 3、开发和优化 RAG 系统，提升模型在垂直领域的专业表现和知识理解能力；
+    - 4、实现多模态交互能力，基于LangChain等框架构建丰富的用户体验；
+    - 5、设计智能体记忆管理系统，通过向量数据库优化长期记忆能力；
+    - 6、参与Multi-Agent协作系统设计，构建可扩展的智能体生态平台。
+  - 职位要求
+    - 1、精通Python、Go编程语言，具备良好的软件框架和应用设计能力；
+    - 2、具备丰富的Prompt Engineering经验和大模型应用开发经验；
+    - 3、熟悉RAG技术实现原理，能够设计和优化知识检索系；
+    - 4、深入理解AI Agent技术栈，熟练掌握主流智能体开发框架，具备LangChain、LlamaIndex等框架的实战经验，能够构建可扩展的智能体系统；
+    - 5、熟悉MCP、HTTP、WebSocket协议，具备Client-Server架构的开发与集成能力，能够设计高效的 Agent 通信机制；
+    - 6、熟悉Llama、Autogen、CrewAI、Dify、LangGraph、LangFlow等Agent框架平台的应用；
+    - 7、具备LLM应用的部署和运维能力，确保系统稳定性和可用性。
 ---
 
 ### 交付里程碑（建议）

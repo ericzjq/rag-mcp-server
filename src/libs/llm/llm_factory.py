@@ -10,6 +10,7 @@ from libs.llm.base_llm import BaseLLM
 from libs.llm.base_vision_llm import BaseVisionLLM
 from libs.llm.openai_llm import OpenAILLM
 from libs.llm.azure_llm import AzureLLM
+from libs.llm.azure_vision_llm import AzureVisionLLM
 from libs.llm.deepseek_llm import DeepSeekLLM
 from libs.llm.ollama_llm import OllamaLLM
 
@@ -22,8 +23,10 @@ _PROVIDERS: Dict[str, Type[BaseLLM]] = {
 }
 
 
-# Vision LLM：B8 抽象与工厂，B9 补齐 azure
-_VISION_PROVIDERS: Dict[str, Type[BaseVisionLLM]] = {}
+# Vision LLM：B8 抽象与工厂，B9 Azure 实现
+_VISION_PROVIDERS: Dict[str, Type[BaseVisionLLM]] = {
+    "azure": AzureVisionLLM,
+}
 
 
 def register_llm_provider(name: str, impl: Type[BaseLLM]) -> None:
