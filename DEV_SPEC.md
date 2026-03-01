@@ -1957,9 +1957,9 @@ dashboard:
 | B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试   |
 | B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试             |
 | B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试              |
-| B7.7 | LLM Reranker 实现             | [ ] | -          |                                                              |
-| B7.8 | Cross-Encoder Reranker 实现   | [ ] | -          |                                                              |
-| B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -          |                                                              |
+| B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | rerank.txt、prompt 注入、ranked ids、回退                    |
+| B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | mock scorer、超时/失败回退、长度不一致回退                  |
+| B8   | Vision LLM 抽象接口与工厂集成        | [x] | 2025-03-01 | BaseVisionLLM、ChatResponse、create_vision_llm、Fake 测试   |
 | B9   | Azure Vision LLM 实现         | [x] | 2025-03-01 | AzureVisionLLM、路径/base64、max_image_size、mock 测试        |
 
 
@@ -1968,7 +1968,7 @@ dashboard:
 
 | 任务编号 | 任务名称                                    | 状态  | 完成日期 | 备注  |
 | ---- | --------------------------------------- | --- | ---- | --- |
-| C1   | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [ ] | -    |     |
+| C1   | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2025-03-01 | types.py、metadata.images、[IMAGE:id]、to_dict/from_dict |
 | C2   | 文件完整性检查（SHA256）                         | [ ] | -    |     |
 | C3   | Loader 抽象基类与 PDF Loader                 | [ ] | -    |     |
 | C4   | Splitter 集成（调用 Libs）                    | [ ] | -    |     |
@@ -2069,15 +2069,15 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度      |
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
-| 阶段 B   | 16     | 13    | 81%     |
-| 阶段 C   | 15     | 0     | 0%      |
+| 阶段 B   | 16     | 16    | 100%    |
+| 阶段 C   | 15     | 1     | 7%      |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **9** | **13%** |
+| **总计** | **68** | **20** | **29%** |
 
 
 ---
@@ -2371,6 +2371,7 @@ dashboard:
 
 ### C1：定义核心数据类型/契约（Document/Chunk/ChunkRecord）
 
+- **状态**：已完成（2025-03-01）。备注：Document/Chunk/ChunkRecord、metadata.source_path 与 images 规范、[IMAGE:id] 占位符、to_dict/from_dict 序列化、test_core_types。
 - **目标**：定义全链路（ingestion → retrieval → mcp tools）共用的数据结构/契约，避免散落在各子模块内导致的耦合与重复。
 - **修改文件**：
   - `src/core/types.py`
