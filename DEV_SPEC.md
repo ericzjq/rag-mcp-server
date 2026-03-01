@@ -1959,7 +1959,7 @@ dashboard:
 | B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试 |
 | B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试 |
 | B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试 |
-| B7.7 | LLM Reranker 实现             | [ ] | -    |     |
+| B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试 |
 | B7.8 | Cross-Encoder Reranker 实现   | [ ] | -    |     |
 | B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -    |     |
 | B9   | Azure Vision LLM 实现         | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 12    | 75%    |
+| 阶段 B   | 16     | 13    | 81%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2311,6 +2311,7 @@ dashboard:
 
 ### B7.7：LLM Reranker（读取 rerank prompt）
 
+- **状态**：已完成（2025-03-01）。备注：llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试。
 - **目标**：补齐 `llm_reranker.py`，读取 `config/prompts/rerank.txt` 构造 prompt（测试中可注入替代文本），并可在失败时返回可回退信号。
 - **修改文件**：
   - `src/libs/reranker/llm_reranker.py`

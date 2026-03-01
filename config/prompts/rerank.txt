@@ -1,1 +1,6 @@
-Placeholder: Rerank prompt. To be filled in later stages.
+Query: {{query}}
+
+Candidates (id: text):
+{{candidates}}
+
+Return a JSON array of chunk ids in relevance order, most relevant first. Example: ["id2", "id1", "id3"]

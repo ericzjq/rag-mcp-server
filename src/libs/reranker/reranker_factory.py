@@ -9,10 +9,12 @@ from core.settings import Settings
 
 from libs.reranker.base_reranker import BaseReranker
 from libs.reranker.none_reranker import NoneReranker
+from libs.reranker.llm_reranker import LLMReranker
 
-# Provider 名称 -> 实现类（B7.7/B7.8 补齐 llm/cross_encoder，none 为默认回退）
+# Provider 名称 -> 实现类（B7.7 llm，B7.8 cross_encoder，none 为默认回退）
 _PROVIDERS: Dict[str, Type[BaseReranker]] = {
     "none": NoneReranker,
+    "llm": LLMReranker,
 }
 
 
