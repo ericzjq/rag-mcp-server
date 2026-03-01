@@ -1961,7 +1961,7 @@ dashboard:
 | B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试 |
 | B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试 |
 | B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | cross_encoder_reranker.py、可注入 scorer、失败回退、mock 测试 |
-| B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -    |     |
+| B8   | Vision LLM 抽象接口与工厂集成        | [x] | 2025-03-01 | BaseVisionLLM、ChatResponse、VisionLlmSettings、create_vision_llm、Fake 测试 |
 | B9   | Azure Vision LLM 实现         | [ ] | -    |     |
 
 
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 14    | 88%    |
+| 阶段 B   | 16     | 15    | 94%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2335,6 +2335,7 @@ dashboard:
 
 ### B8：Vision LLM 抽象接口与工厂集成
 
+- **状态**：已完成（2025-03-01）。备注：BaseVisionLLM、ChatResponse、VisionLlmSettings、create_vision_llm、Fake 测试。
 - **目标**：定义 `BaseVisionLLM` 抽象接口，扩展 `LLMFactory` 支持 Vision LLM 创建，为 C7 的 ImageCaptioner 提供底层抽象。
 - **修改文件**：
   - `src/libs/llm/base_vision_llm.py`

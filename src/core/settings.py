@@ -84,6 +84,12 @@ class ObservabilitySettings:
 
 
 @dataclass(frozen=True)
+class VisionLlmSettings:
+    """Vision LLM 配置节（B8，可选）。"""
+    provider: str
+
+
+@dataclass(frozen=True)
 class Settings:
     """主配置：仅做数据结构与最小校验。"""
     llm: LlmSettings
@@ -94,6 +100,7 @@ class Settings:
     splitter: SplitterSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
+    vision_llm: Optional[VisionLlmSettings] = None
 
 
 # ---------------------------------------------------------------------------
@@ -193,6 +200,9 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
         log_level=str(data["observability"]["log_level"]),
         traces_path=str(data["observability"]["traces_path"]),
     )
+    vision_llm = None
+    if data.get("vision_llm") and isinstance(data["vision_llm"], dict) and data["vision_llm"].get("provider"):
+        vision_llm = VisionLlmSettings(provider=str(data["vision_llm"]["provider"]))
     return Settings(
         llm=llm,
         embedding=embedding,
@@ -202,6 +212,7 @@ def _build_settings(data: Dict[str, Any]) -> Settings:
         splitter=splitter,
         evaluation=evaluation,
         observability=observability,
+        vision_llm=vision_llm,
     )
 
 
