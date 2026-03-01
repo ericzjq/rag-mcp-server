@@ -1958,7 +1958,7 @@ dashboard:
 | B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试 |
 | B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试 |
 | B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试 |
-| B7.6 | ChromaStore 默认实现            | [ ] | -    |     |
+| B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试 |
 | B7.7 | LLM Reranker 实现             | [ ] | -    |     |
 | B7.8 | Cross-Encoder Reranker 实现   | [ ] | -    |     |
 | B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 11    | 69%    |
+| 阶段 B   | 16     | 12    | 75%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2297,6 +2297,7 @@ dashboard:
 
 ### B7.6：ChromaStore（VectorStore 默认后端）
 
+- **状态**：已完成（2025-03-01）。备注：chroma_store.py、持久化、upsert/query、roundtrip 集成测试。
 - **目标**：补齐 `chroma_store.py`，支持最小 `upsert(records)` 与 `query(vector, top_k, filters)`，并支持本地持久化目录（例如 `data/db/chroma/`）。
 - **修改文件**：
   - `src/libs/vector_store/chroma_store.py`

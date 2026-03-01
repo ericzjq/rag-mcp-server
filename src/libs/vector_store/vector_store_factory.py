@@ -8,9 +8,12 @@ from typing import Dict, Type
 from core.settings import Settings
 
 from libs.vector_store.base_vector_store import BaseVectorStore
+from libs.vector_store.chroma_store import ChromaStore
 
-# Provider 名称 -> 实现类（B7.6 补齐 chroma，测试中可注册 Fake）
-_PROVIDERS: Dict[str, Type[BaseVectorStore]] = {}
+# Provider 名称 -> 实现类（B7.6 chroma，测试中可注册 Fake）
+_PROVIDERS: Dict[str, Type[BaseVectorStore]] = {
+    "chroma": ChromaStore,
+}
 
 
 def register_vector_store_provider(name: str, impl: Type[BaseVectorStore]) -> None:
