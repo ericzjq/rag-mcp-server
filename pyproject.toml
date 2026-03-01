@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Modular RAG MCP Server - 可插拔、可观测的 RAG 知识检索服务"
 readme = "README.md"
 requires-python = ">=3.9"
+dependencies = [
+    "pytest>=7.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
