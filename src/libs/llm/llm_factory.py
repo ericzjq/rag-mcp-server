@@ -10,12 +10,14 @@ from libs.llm.base_llm import BaseLLM
 from libs.llm.openai_llm import OpenAILLM
 from libs.llm.azure_llm import AzureLLM
 from libs.llm.deepseek_llm import DeepSeekLLM
+from libs.llm.ollama_llm import OllamaLLM
 
-# Provider 名称 -> 实现类（B7.1 补齐 openai/azure/deepseek，B7.2 补齐 ollama）
+# Provider 名称 -> 实现类（B7.1 openai/azure/deepseek，B7.2 ollama）
 _PROVIDERS: Dict[str, Type[BaseLLM]] = {
     "openai": OpenAILLM,
     "azure": AzureLLM,
     "deepseek": DeepSeekLLM,
+    "ollama": OllamaLLM,
 }
 
 
