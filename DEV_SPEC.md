@@ -1956,7 +1956,7 @@ dashboard:
 | B7.1 | OpenAI-Compatible LLM 实现    | [x] | 2025-03-01 | OpenAI/Azure/DeepSeek 实现、LlmSettings 扩展、工厂注册、smoke 测试 |
 | B7.2 | Ollama LLM 实现               | [x] | 2025-03-01 | ollama_llm.py、默认 base_url、工厂注册、mock 测试与可读错误 |
 | B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试 |
-| B7.4 | Ollama Embedding 实现         | [ ] | -    |     |
+| B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试 |
 | B7.5 | Recursive Splitter 默认实现     | [ ] | -    |     |
 | B7.6 | ChromaStore 默认实现            | [ ] | -    |     |
 | B7.7 | LLM Reranker 实现             | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 9     | 56%    |
+| 阶段 B   | 16     | 10    | 63%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2269,6 +2269,7 @@ dashboard:
 
 ### B7.4：Ollama Embedding 实现
 
+- **状态**：已完成（2025-03-01）。备注：ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试。
 - **目标**：补齐 `ollama_embedding.py`，支持通过 Ollama HTTP API 调用本地部署的 Embedding 模型（如 `nomic-embed-text`、`mxbai-embed-large` 等），实现 `embed(texts)` 批量向量化功能。
 - **修改文件**：
   - `src/libs/embedding/ollama_embedding.py`
