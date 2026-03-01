@@ -1960,7 +1960,7 @@ dashboard:
 | B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试 |
 | B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试 |
 | B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | llm_reranker.py、rerank.txt 模板、ranked ids 解析、失败回退、mock 测试 |
-| B7.8 | Cross-Encoder Reranker 实现   | [ ] | -    |     |
+| B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | cross_encoder_reranker.py、可注入 scorer、失败回退、mock 测试 |
 | B8   | Vision LLM 抽象接口与工厂集成        | [ ] | -    |     |
 | B9   | Azure Vision LLM 实现         | [ ] | -    |     |
 
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 13    | 81%    |
+| 阶段 B   | 16     | 14    | 88%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2323,6 +2323,7 @@ dashboard:
 
 ### B7.8：Cross-Encoder Reranker（本地/托管模型，占位可跑）
 
+- **状态**：已完成（2025-03-01）。备注：cross_encoder_reranker.py、可注入 scorer、失败回退、mock 测试。
 - **目标**：补齐 `cross_encoder_reranker.py`，支持对 Top-M candidates 打分排序；测试中用 mock scorer 保证 deterministic。
 - **修改文件**：
   - `src/libs/reranker/cross_encoder_reranker.py`
