@@ -1937,9 +1937,9 @@ dashboard:
 
 | 任务编号 | 任务名称                | 状态  | 完成日期 | 备注  |
 | ---- | ------------------- | --- | ---- | --- |
-| A1   | 初始化目录树与最小可运行入口      | [x] | -    |     |
-| A2   | 引入 pytest 并建立测试目录约定 | [x] | -    |     |
-| A3   | 配置加载与校验（Settings）   | [x] | -    |     |
+| A1   | 初始化目录树与最小可运行入口      | [x] | 2025-03-01 | 目录骨架、main/pyproject/config、五大包可导入 |
+| A2   | 引入 pytest 并建立测试目录约定 | [x] | 2025-03-01 | pytest 基座、test_smoke_imports、fixtures 占位 |
+| A3   | 配置加载与校验（Settings）   | [x] | 2025-03-01 | Settings/load_settings/validate、logger 占位、main 加载配置 |
 
 
 #### 阶段 B：Libs 可插拔层
@@ -1947,10 +1947,10 @@ dashboard:
 
 | 任务编号 | 任务名称                        | 状态  | 完成日期 | 备注  |
 | ---- | --------------------------- | --- | ---- | --- |
-| B1   | LLM 抽象接口与工厂                 | [x] | -    |     |
-| B2   | Embedding 抽象接口与工厂           | [x] | -    |     |
-| B3   | Splitter 抽象接口与工厂            | [x] | -    |     |
-| B4   | VectorStore 抽象接口与工厂         | [ ] | -    |     |
+| B1   | LLM 抽象接口与工厂                 | [x] | 2025-03-01 | BaseLLM、LLMFactory、Fake 路由测试 |
+| B2   | Embedding 抽象接口与工厂           | [x] | 2025-03-01 | BaseEmbedding、EmbeddingFactory、Fake 稳定向量测试 |
+| B3   | Splitter 抽象接口与工厂            | [x] | 2025-03-01 | BaseSplitter、SplitterFactory、SplitterSettings、Fake 路由测试 |
+| B4   | VectorStore 抽象接口与工厂         | [x] | 2025-03-01 | BaseVectorStore upsert/query 契约、VectorStoreFactory、契约测试 |
 | B5   | Reranker 抽象接口与工厂（含 None 回退） | [ ] | -    |     |
 | B6   | Evaluator 抽象接口与工厂           | [ ] | -    |     |
 | B7.1 | OpenAI-Compatible LLM 实现    | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 3     | 19%    |
+| 阶段 B   | 16     | 4     | 25%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2079,7 +2079,7 @@ dashboard:
 | 阶段 G   | 6      | 0     | 0%     |
 | 阶段 H   | 5      | 0     | 0%     |
 | 阶段 I   | 5      | 0     | 0%     |
-| **总计** | **68** | **6** | **9%** |
+| **总计** | **68** | **7** | **10%** |
 
 
 ---
