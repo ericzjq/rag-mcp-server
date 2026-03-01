@@ -7,9 +7,12 @@ from typing import Dict, Type
 from core.settings import Settings
 
 from libs.splitter.base_splitter import BaseSplitter
+from libs.splitter.recursive_splitter import RecursiveSplitter
 
-# Provider 名称 -> 实现类（B7.5 补齐 recursive，测试中可注册 Fake）
-_PROVIDERS: Dict[str, Type[BaseSplitter]] = {}
+# Provider 名称 -> 实现类（B7.5 recursive，测试中可注册 Fake）
+_PROVIDERS: Dict[str, Type[BaseSplitter]] = {
+    "recursive": RecursiveSplitter,
+}
 
 
 def register_splitter_provider(name: str, impl: Type[BaseSplitter]) -> None:

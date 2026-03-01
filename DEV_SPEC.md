@@ -1957,7 +1957,7 @@ dashboard:
 | B7.2 | Ollama LLM 实现               | [x] | 2025-03-01 | ollama_llm.py、默认 base_url、工厂注册、mock 测试与可读错误 |
 | B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2025-03-01 | EmbeddingSettings 扩展、openai/azure 实现与工厂注册、smoke 测试 |
 | B7.4 | Ollama Embedding 实现         | [x] | 2025-03-01 | ollama_embedding.py、默认 base_url、批量 /api/embed、工厂注册、mock 测试 |
-| B7.5 | Recursive Splitter 默认实现     | [ ] | -    |     |
+| B7.5 | Recursive Splitter 默认实现     | [x] | 2025-03-01 | LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试 |
 | B7.6 | ChromaStore 默认实现            | [ ] | -    |     |
 | B7.7 | LLM Reranker 实现             | [ ] | -    |     |
 | B7.8 | Cross-Encoder Reranker 实现   | [ ] | -    |     |
@@ -2071,7 +2071,7 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度     |
 | ------ | ------ | ----- | ------ |
 | 阶段 A   | 3      | 3     | 100%   |
-| 阶段 B   | 16     | 10    | 63%    |
+| 阶段 B   | 16     | 11    | 69%    |
 | 阶段 C   | 15     | 0     | 0%     |
 | 阶段 D   | 7      | 0     | 0%     |
 | 阶段 E   | 6      | 0     | 0%     |
@@ -2285,6 +2285,7 @@ dashboard:
 
 ### B7.5：Recursive Splitter 默认实现
 
+- **状态**：已完成（2025-03-01）。备注：LangChain 封装、工厂注册、chunk_size/overlap、Markdown 测试。
 - **目标**：补齐 `recursive_splitter.py`，封装 LangChain 的切分逻辑，作为默认切分器。
 - **修改文件**：
   - `src/libs/splitter/recursive_splitter.py`
