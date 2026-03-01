@@ -1,0 +1,10 @@
+{
+  "typical_noise_scenario": "  \n\n  — 1 —  \n  Page 1  \n\n  Actual content here.  \n\n  — 2 —  \n  Page 2  \n\n  More content.  \n\n  ",
+  "ocr_errors": "So me  OCR  e r r o r s   and   spa  cing   issues.",
+  "page_header_footer": "Company Name 2024\n\nBody paragraph.\n\n1/5\n\nConfidential",
+  "excessive_whitespace": "First.\n\n\n\n\n\nSecond.\n\n\nThird.\t\t\t  \n  End.",
+  "format_markers": "<!-- comment -->\n\n## Header\n\nContent.\n\n---\n\n****\n\nFooter",
+  "clean_text": "This is already clean. No changes needed.",
+  "code_blocks": "```python\ndef foo():\n    return 1\n```\n\nNormal text.",
+  "mixed_noise": "  — 3 —  \n  \n  Page 3  \n\n  \n  Real   content   here.  \n\n  <!-- remove me -->  \n\n  End.  "
+}

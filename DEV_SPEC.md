@@ -1972,7 +1972,7 @@ dashboard:
 | C2   | 文件完整性检查（SHA256）                         | [x] | 2025-03-01 | FileIntegrityChecker、SQLiteIntegrityChecker、WAL、should_skip/mark |
 | C3   | Loader 抽象基类与 PDF Loader                 | [x] | 2025-03-01 | BaseLoader、PdfLoader、pypdf、[IMAGE:id]、metadata.images、降级 |
 | C4   | Splitter 集成（调用 Libs）                    | [x] | 2025-03-01 | DocumentChunker、chunk_id、metadata/chunk_index、source_ref、FakeSplitter 测试 |
-| C5   | Transform 基类 + ChunkRefiner             | [ ] | -    |     |
+| C5   | Transform 基类 + ChunkRefiner             | [x] | 2025-03-01 | BaseTransform、ChunkRefiner、规则+LLM、降级、TraceContext、noisy_chunks |
 | C6   | MetadataEnricher                        | [ ] | -    |     |
 | C7   | ImageCaptioner                          | [ ] | -    |     |
 | C8   | DenseEncoder                            | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 4     | 27%     |
+| 阶段 C   | 15     | 5     | 33%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **23** | **34%** |
+| **总计** | **68** | **24** | **35%** |
 
 
 ---
@@ -2478,6 +2478,7 @@ dashboard:
 
 ### C5：Transform 抽象基类 + ChunkRefiner（规则去噪 + LLM 增强）
 
+- **状态**：已完成（2025-03-01）。备注：TraceContext、BaseTransform、ChunkRefiner（_rule_based_refine、_llm_refine、_load_prompt）、refined_by/refinement_fallback、noisy_chunks.json、test_chunk_refiner + integration 占位。
 - **目标**：定义 `BaseTransform`；实现 `ChunkRefiner`：先做规则去噪，再通过LLM进行智能增强，并提供失败降级机制（LLM异常时回退到规则结果，不阻塞 ingestion）。
 - **前置条件**（必须准备）：
   - **必须配置LLM**：在 `config/settings.yaml` 中配置可用的LLM（provider/model/api_key）

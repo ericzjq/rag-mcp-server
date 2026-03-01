@@ -1,1 +1,3 @@
-Placeholder: Chunk refinement prompt. To be filled in later stages.
+Refine the following text chunk: remove noise (headers, footers, excessive whitespace), preserve meaning and structure. Output only the refined text.
+
+{text}
