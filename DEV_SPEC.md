@@ -1974,7 +1974,7 @@ dashboard:
 | C4   | Splitter 集成（调用 Libs）                    | [x] | 2025-03-01 | DocumentChunker、chunk_id、metadata/chunk_index、source_ref、FakeSplitter 测试 |
 | C5   | Transform 基类 + ChunkRefiner             | [x] | 2025-03-01 | BaseTransform、ChunkRefiner、规则+LLM、降级、TraceContext、noisy_chunks |
 | C6   | MetadataEnricher                        | [x] | 2025-03-01 | 规则 title/summary/tags、可选 LLM、enriched_by/enrichment_fallback |
-| C7   | ImageCaptioner                          | [ ] | -    |     |
+| C7   | ImageCaptioner                          | [x] | 2025-03-01 | metadata.images→caption、has_unprocessed_images、mock Vision LLM 测试 |
 | C8   | DenseEncoder                            | [ ] | -    |     |
 | C9   | SparseEncoder                           | [ ] | -    |     |
 | C10  | BatchProcessor                          | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 6     | 40%     |
+| 阶段 C   | 15     | 7     | 47%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **25** | **37%** |
+| **总计** | **68** | **26** | **38%** |
 
 
 ---
@@ -2568,6 +2568,7 @@ dashboard:
 
 ### C7：ImageCaptioner（可选生成 caption + 降级不阻塞）
 
+- **状态**：已完成（2025-03-01）。备注：ImageCaptioner、metadata.images→image_captions、has_unprocessed_images、image_captioning.txt、test_image_captioner_fallback。
 - **目标**：实现 `image_captioner.py`：当启用 Vision LLM 且存在 image_refs 时生成 caption 并写回 chunk metadata；当禁用/不可用/异常时走降级路径，不阻塞 ingestion。
 - **修改文件**：
   - `src/ingestion/transform/image_captioner.py`

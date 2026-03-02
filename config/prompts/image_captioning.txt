@@ -1,1 +1,1 @@
-Placeholder: Image captioning prompt. To be filled in later stages.
+Describe this image briefly in one sentence for use as alt-text or caption.
