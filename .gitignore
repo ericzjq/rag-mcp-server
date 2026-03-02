@@ -15,6 +15,9 @@ ENV/
 .env.local
 *.local
 
+# Config with secrets (LLM/embedding API keys)
+config/settings.yaml
+
 # IDE
 .idea/
 .vscode/

@@ -2555,7 +2555,7 @@ dashboard:
 
 ### C6：MetadataEnricher（规则增强 + 可选 LLM 增强 + 降级）
 
-- **状态**：已完成（2025-03-01）。备注：MetadataEnricher、_rule_title/_rule_summary/_rule_tags、_llm_enrich JSON、enriched_by/enrichment_fallback、test_metadata_enricher_contract。
+- **状态**：已完成（2025-03-01）。备注：MetadataEnricher、_rule_title/_rule_summary/_rule_tags、_llm_enrich JSON、enriched_by/enrichment_fallback、test_metadata_enricher_contract；已用真实 DeepSeek 配置跑 test_metadata_enricher_llm 集成测试验证连通性与效果。
 - **目标**：实现元数据增强模块：提供规则增强的默认实现，并重点支持 LLM 增强（配置已就绪，LLM 开关打开）。利用 LLM 对 chunk 进行高质量的 title 生成、summary 摘要和 tags 提取。同时保留失败降级机制，确保不阻塞 ingestion。
 - **修改文件**：
   - `src/ingestion/transform/metadata_enricher.py`

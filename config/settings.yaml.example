@@ -1,9 +1,11 @@
-# 主配置文件 (最小可解析占位，A3 补齐校验)
-# LLM / Embedding / VectorStore 等配置在后续阶段补充
+# 主配置文件模板。复制为 settings.yaml 并填入 api_key 等。
+# config/settings.yaml 已加入 .gitignore，请勿提交含密钥的文件。
 
 llm:
-  provider: openai
-  model: gpt-4o-mini
+  provider: deepseek
+  model: deepseek-chat
+  api_key: ""          # 或使用环境变量
+  base_url: https://api.deepseek.com
 
 embedding:
   provider: openai
