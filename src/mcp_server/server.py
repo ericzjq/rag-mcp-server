@@ -15,6 +15,10 @@ from mcp_server.tools.list_collections import (
     list_collections,
     LIST_COLLECTIONS_SCHEMA,
 )
+from mcp_server.tools.get_document_summary import (
+    get_document_summary,
+    GET_DOCUMENT_SUMMARY_SCHEMA,
+)
 
 
 def _setup_logging() -> None:
@@ -68,6 +72,12 @@ def main() -> int:
         "列举知识库中可用的文档集合（data/documents 下子目录名）",
         LIST_COLLECTIONS_SCHEMA,
         list_collections,
+    )
+    handler.register_tool(
+        "get_document_summary",
+        "按 doc_id 获取文档摘要与元信息（title/summary/tags）",
+        GET_DOCUMENT_SUMMARY_SCHEMA,
+        get_document_summary,
     )
     try:
         _run_stdio_loop(handler)
