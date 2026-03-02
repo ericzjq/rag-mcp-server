@@ -112,6 +112,26 @@ class ChromaStore(BaseVectorStore):
             out.append(item)
         return out
 
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        """根据 id 批量获取 documents 与 metadatas。"""
+        if not ids:
+            return []
+        coll = self._get_collection()
+        result = coll.get(ids=ids, include=["metadatas", "documents"])
+        out: List[Dict[str, Any]] = []
+        id_list = result["ids"] if result.get("ids") else []
+        metadatas = result.get("metadatas") or []
+        documents = result.get("documents") or []
+        for i, vid in enumerate(id_list):
+            meta = metadatas[i] if i < len(metadatas) else {}
+            text = documents[i] if i < len(documents) else ""
+            out.append({
+                "id": vid,
+                "text": text if text is not None else "",
+                "metadata": meta or {},
+            })
+        return out
+
     def _to_chroma_where(self, filters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """将简单 filters 转为 Chroma where 格式（标量等值）。"""
         if not filters:

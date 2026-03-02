@@ -62,6 +62,10 @@ class _MockVectorStore(BaseVectorStore):
     ) -> List[Dict[str, Any]]:
         return self._results[:top_k]
 
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        by_id = {r["id"]: r for r in self._results}
+        return [{"id": i, "text": by_id.get(i, {}).get("text", ""), "metadata": by_id.get(i, {}).get("metadata", {})} for i in ids if i in by_id]
+
 
 def test_retrieve_returns_retrieval_results_with_chunk_id_score_text_metadata() -> None:
     """返回结果包含 chunk_id、score、text、metadata。"""

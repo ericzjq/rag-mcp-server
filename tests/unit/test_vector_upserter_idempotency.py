@@ -47,6 +47,9 @@ class _MockVectorStore(BaseVectorStore):
     ) -> List[Any]:
         return []
 
+    def get_by_ids(self, ids: List[str]) -> List[dict]:
+        return []
+
 
 def test_same_chunk_twice_upsert_same_id() -> None:
     """同一 chunk 两次 upsert 产生相同 id。"""

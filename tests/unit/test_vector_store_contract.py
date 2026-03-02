@@ -72,8 +72,20 @@ class FakeVectorStore(BaseVectorStore):
         # 简单返回：按 id 顺序取前 top_k 条，score 固定 1.0（契约只约束 shape）
         items = []
         for i, (vid, rec) in enumerate(list(self._store.items())[:top_k]):
-            items.append({"id": vid, "score": 1.0, "metadata": rec.get("metadata", {})})
+            items.append({"id": vid, "score": 1.0, "metadata": rec.get("metadata", {}), "text": rec.get("metadata", {}).get("text", "")})
         return items
+
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        out = []
+        for vid in ids:
+            rec = self._store.get(vid)
+            if rec is not None:
+                out.append({
+                    "id": vid,
+                    "text": rec.get("metadata", {}).get("text", ""),
+                    "metadata": dict(rec.get("metadata", {})),
+                })
+        return out
 
 
 def test_upsert_record_shape() -> None:

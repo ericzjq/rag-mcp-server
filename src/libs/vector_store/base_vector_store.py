@@ -51,6 +51,19 @@ class BaseVectorStore(ABC):
             trace: 可选追踪上下文，当前可传 None。
 
         Returns:
-            结果列表，每项至少含 "id" (str)、"score" (float)，可选 "metadata"。
+            结果列表，每项至少含 "id" (str)、"score" (float)，可选 "metadata"、"text"。
+        """
+        ...
+
+    @abstractmethod
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        """
+        根据 chunk_id 批量获取记录（含 text、metadata），用于 SparseRetriever 等。
+
+        Args:
+            ids: chunk_id 列表。
+
+        Returns:
+            与 ids 顺序一致的记录列表，每项至少含 "id"、"text"、"metadata"；缺失 id 可省略或 text 为空。
         """
         ...
