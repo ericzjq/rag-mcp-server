@@ -172,6 +172,14 @@ Action Required:
 - **Integration Tests**：使用真实本地依赖，Mock 外部 API
 - **E2E Tests**：尽量少 Mock，验证真实行为
 
+### 真实 LLM 验收（与 Mock 互补）
+
+**当验收标准中出现「mock LLM」或「Mock LLM」测试时**：除单元测试（mock）外，**必须同时使用真实 DeepSeek 配置进行集成测试**，验证连通性与效果。
+
+- 真实 LLM 测试使用项目配置的 **DeepSeek**（`config/settings.yaml` 中 `llm.provider: deepseek`，本地配置 api_key、base_url）。
+- 集成测试文件建议：`tests/integration/test_<模块>_llm.py`，标记 `@pytest.mark.integration`；无配置或缺少 API key 时可 skip，不报错。
+- 约定见 `tests/integration/README.md`。
+
 ---
 
 ## Validation Checklist（验收检查）
@@ -195,3 +203,4 @@ Action Required:
 3. **确定性**：测试不得出现随机失败
 4. **独立性**：每条测试可单独运行
 5. **失败信息清晰**：失败时需提供可操作的错误信息
+6. **Mock LLM 与真实 LLM 双轨**：验收标准中若要求 mock LLM 测试，须同时补充真实 DeepSeek 集成测试并执行验证（见上文「真实 LLM 验收」）
