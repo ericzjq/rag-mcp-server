@@ -139,6 +139,65 @@ def test_pipeline_full_run_outputs_chroma_bm25_images(tmp_path: Path) -> None:
     assert (bm25_dir / "index.json").exists()
 
 
+def test_ingestion_trace_contains_stages_and_trace_type(tmp_path: Path) -> None:
+    """一次摄取生成 trace，包含 load/split/transform/embed/upsert，trace_type=ingestion，每阶段含 elapsed_ms、method。"""
+    from core.trace.trace_context import TraceContext
+    from libs.loader.file_integrity import SQLiteIntegrityChecker
+    from libs.splitter.splitter_factory import register_splitter_provider
+    from ingestion.storage.image_storage import ImageStorage
+
+    register_splitter_provider("fake_f4", _FakeSplitter)
+    settings = _make_settings(
+        persist_dir=str(tmp_path / "chroma"),
+        splitter_provider="fake_f4",
+    )
+    pdf_path = tmp_path / "doc.pdf"
+    from pypdf import PdfWriter
+    w = PdfWriter()
+    w.add_blank_page(72, 72)
+    with open(pdf_path, "wb") as f:
+        w.write(f)
+
+    class _MockLoader(BaseLoader):
+        def load(self, path: str) -> Document:
+            return Document(id="f4_doc", text="A\n\nB", metadata={"source_path": path})
+
+    class _MockBatchProcessor(BatchProcessor):
+        def process(self, chunks: List[Chunk], batch_size: int = 32, trace: Optional[Any] = None) -> List[ChunkRecord]:
+            from ingestion.embedding.sparse_encoder import SparseEncoder
+            sparse = SparseEncoder()
+            recs = sparse.encode(chunks, trace=trace)
+            return [
+                ChunkRecord(id=r.id, text=r.text, metadata=dict(r.metadata or {}), dense_vector=[0.1] * 4, sparse_vector=r.sparse_vector)
+                for r in recs
+            ]
+
+    pipeline = IngestionPipeline(
+        settings,
+        integrity_checker=SQLiteIntegrityChecker(db_path=str(tmp_path / "db" / "hist.db")),
+        loader=_MockLoader(),
+        batch_processor=_MockBatchProcessor(settings),
+        bm25_index_dir=str(tmp_path / "db" / "bm25"),
+        image_storage=ImageStorage(db_path=str(tmp_path / "db" / "img.db"), images_base=str(tmp_path / "images")),
+    )
+    pipeline._transforms = [
+        ChunkRefiner(settings, use_llm=False),
+        MetadataEnricher(settings, use_llm=False),
+        ImageCaptioner(settings),
+    ]
+
+    trace = TraceContext(trace_type="ingestion")
+    pipeline.run(str(pdf_path), force=True, trace=trace)
+
+    d = trace.to_dict()
+    assert d["trace_type"] == "ingestion"
+    stages = d["stages"]
+    for name in ("load", "split", "transform", "embed", "upsert"):
+        assert name in stages, stages
+        assert "elapsed_ms" in stages[name]
+        assert "method" in stages[name]
+
+
 def test_pipeline_nonexistent_path_raises() -> None:
     """文档不存在时抛出明确异常。"""
     settings = _make_settings()

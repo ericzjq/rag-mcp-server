@@ -1,8 +1,9 @@
 """
-Pipeline（C14）：串行执行 integrity→load→split→transform→encode→store，失败步骤抛出清晰异常。
+Pipeline（C14）：串行执行 integrity→load→split→transform→encode→store，失败步骤抛出清晰异常。F4 打点。
 """
 
 import logging
+import time
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -84,7 +85,7 @@ class IngestionPipeline:
         Returns:
             摘要 dict：document_id, chunks_count, records_count 等。
         """
-        trace = trace or TraceContext()
+        trace = trace or TraceContext(trace_type="ingestion")
         if not path or not Path(path).exists():
             raise FileNotFoundError(f"文档不存在: {path}")
 
@@ -97,8 +98,13 @@ class IngestionPipeline:
 
         # 2. Load
         logger.info("加载文档: %s", path)
+        t0 = time.perf_counter()
         document = self._loader.load(path)
-        trace.record_stage("load", {"document_id": document.id})
+        trace.record_stage("load", {
+            "document_id": document.id,
+            "method": type(self._loader).__name__.lower().replace("loader", "") or "loader",
+            "elapsed_ms": round((time.perf_counter() - t0) * 1000, 2),
+        })
 
         # 3. 登记图片到 ImageStorage（Loader 已写入文件）
         images = document.metadata.get("images") if document.metadata else []
@@ -116,35 +122,57 @@ class IngestionPipeline:
 
         # 4. Split
         logger.info("分块: document_id=%s", document.id)
+        t1 = time.perf_counter()
         chunks = self._chunker.split_document(document, trace=trace)
         if not chunks:
             logger.warning("文档分块为空: %s", path)
             if self._integrity is not None and not force:
                 file_hash = self._integrity.compute_sha256(path)
                 self._integrity.mark_success(file_hash, path)
+            trace.finish()
             return {"document_id": document.id, "chunks_count": 0, "records_count": 0}
-        trace.record_stage("split", {"chunks_count": len(chunks)})
+        trace.record_stage("split", {
+            "chunks_count": len(chunks),
+            "method": getattr(self._settings.splitter, "provider", "splitter"),
+            "elapsed_ms": round((time.perf_counter() - t1) * 1000, 2),
+        })
 
         # 5. Transform
+        t2 = time.perf_counter()
         for i, t in enumerate(self._transforms):
             chunks = t.transform(chunks, trace=trace)
-        trace.record_stage("transform", {"chunks_count": len(chunks)})
+        trace.record_stage("transform", {
+            "chunks_count": len(chunks),
+            "method": ",".join(type(x).__name__.lower() for x in self._transforms),
+            "elapsed_ms": round((time.perf_counter() - t2) * 1000, 2),
+        })
 
-        # 6. Encode
+        # 6. Encode (embed)
         logger.info("编码: %d chunks", len(chunks))
+        t3 = time.perf_counter()
         records = self._batch_processor.process(chunks, batch_size=batch_size, trace=trace)
-        trace.record_stage("encode", {"records_count": len(records)})
+        trace.record_stage("embed", {
+            "records_count": len(records),
+            "method": getattr(self._settings.embedding, "provider", "embedding"),
+            "elapsed_ms": round((time.perf_counter() - t3) * 1000, 2),
+        })
 
-        # 7. Store
+        # 7. Store (upsert)
         logger.info("写入向量与 BM25 索引")
+        t4 = time.perf_counter()
         self._vector_upserter.upsert(records, trace=trace)
         indexer = BM25Indexer(index_dir=self._bm25_index_dir)
         indexer.build(records).save()
+        trace.record_stage("upsert", {
+            "method": getattr(self._settings.vector_store, "provider", "chroma") + ",bm25",
+            "elapsed_ms": round((time.perf_counter() - t4) * 1000, 2),
+        })
 
         if self._integrity is not None and not force:
             file_hash = self._integrity.compute_sha256(path)
             self._integrity.mark_success(file_hash, path)
 
+        trace.finish()
         return {
             "document_id": document.id,
             "chunks_count": len(chunks),
