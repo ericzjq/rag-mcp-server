@@ -1976,7 +1976,7 @@ dashboard:
 | C6   | MetadataEnricher                        | [x] | 2025-03-01 | 规则 title/summary/tags、可选 LLM、enriched_by/enrichment_fallback |
 | C7   | ImageCaptioner                          | [x] | 2025-03-01 | metadata.images→caption、has_unprocessed_images、mock Vision LLM 测试 |
 | C8   | DenseEncoder                            | [x] | 2026-03-02 | chunks→BaseEmbedding→ChunkRecord，数量与维度一致、单元测试 |
-| C9   | SparseEncoder                           | [ ] | -    |     |
+| C9   | SparseEncoder                           | [x] | 2026-03-02 | term weights Dict[str,float]、空文本→{}、供 bm25_indexer |
 | C10  | BatchProcessor                          | [ ] | -    |     |
 | C11  | BM25Indexer（倒排索引+IDF计算）                 | [ ] | -    |     |
 | C12  | VectorUpserter（幂等upsert）                | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 8     | 53%     |
+| 阶段 C   | 15     | 9     | 60%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **27** | **40%** |
+| **总计** | **68** | **28** | **41%** |
 
 
 ---
