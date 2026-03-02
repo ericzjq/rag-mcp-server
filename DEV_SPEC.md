@@ -1973,7 +1973,7 @@ dashboard:
 | C3   | Loader 抽象基类与 PDF Loader                 | [x] | 2025-03-01 | BaseLoader、PdfLoader、pypdf、[IMAGE:id]、metadata.images、降级 |
 | C4   | Splitter 集成（调用 Libs）                    | [x] | 2025-03-01 | DocumentChunker、chunk_id、metadata/chunk_index、source_ref、FakeSplitter 测试 |
 | C5   | Transform 基类 + ChunkRefiner             | [x] | 2025-03-01 | BaseTransform、ChunkRefiner、规则+LLM、降级、TraceContext、noisy_chunks |
-| C6   | MetadataEnricher                        | [ ] | -    |     |
+| C6   | MetadataEnricher                        | [x] | 2025-03-01 | 规则 title/summary/tags、可选 LLM、enriched_by/enrichment_fallback |
 | C7   | ImageCaptioner                          | [ ] | -    |     |
 | C8   | DenseEncoder                            | [ ] | -    |     |
 | C9   | SparseEncoder                           | [ ] | -    |     |
@@ -2070,14 +2070,14 @@ dashboard:
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
-| 阶段 C   | 15     | 5     | 33%     |
+| 阶段 C   | 15     | 6     | 40%     |
 | 阶段 D   | 7      | 0     | 0%      |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **24** | **35%** |
+| **总计** | **68** | **25** | **37%** |
 
 
 ---
@@ -2555,6 +2555,7 @@ dashboard:
 
 ### C6：MetadataEnricher（规则增强 + 可选 LLM 增强 + 降级）
 
+- **状态**：已完成（2025-03-01）。备注：MetadataEnricher、_rule_title/_rule_summary/_rule_tags、_llm_enrich JSON、enriched_by/enrichment_fallback、test_metadata_enricher_contract。
 - **目标**：实现元数据增强模块：提供规则增强的默认实现，并重点支持 LLM 增强（配置已就绪，LLM 开关打开）。利用 LLM 对 chunk 进行高质量的 title 生成、summary 摘要和 tags 提取。同时保留失败降级机制，确保不阻塞 ingestion。
 - **修改文件**：
   - `src/ingestion/transform/metadata_enricher.py`
