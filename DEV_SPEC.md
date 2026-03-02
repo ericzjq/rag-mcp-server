@@ -2021,7 +2021,7 @@ dashboard:
 | F2   | 结构化日志 logger（JSON Lines）                    | [x] | 2026-03-02 | JSONFormatter、get_trace_logger、write_trace→logs/traces.jsonl |
 | F3   | 在 Query 链路打点                                | [x] | 2026-03-02 | HybridSearch/Reranker record_stage、query_processing/dense/sparse/fusion/rerank、elapsed_ms+method |
 | F4   | 在 Ingestion 链路打点                            | [x] | 2026-03-02 | trace_type=ingestion、load/split/transform/embed/upsert、elapsed_ms+method、finish |
-| F5   | Pipeline 进度回调 (on_progress)                 | [ ] | -    |     |
+| F5   | Pipeline 进度回调 (on_progress)                 | [x] | 2026-03-02 | on_progress(stage_name,current,total)、各阶段完成时触发、None 无影响 |
 
 
 #### 阶段 G：可视化管理平台 Dashboard
@@ -2073,11 +2073,11 @@ dashboard:
 | 阶段 C   | 15     | 15    | 100%    |
 | 阶段 D   | 7      | 7     | 100%    |
 | 阶段 E   | 6      | 6     | 100%    |
-| 阶段 F   | 5      | 4     | 80%     |
+| 阶段 F   | 5      | 5     | 100%    |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **51** | **75%** |
+| **总计** | **68** | **52** | **76%** |
 
 
 ---

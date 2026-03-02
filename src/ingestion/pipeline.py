@@ -5,7 +5,7 @@ Pipeline（C14）：串行执行 integrity→load→split→transform→encode�
 import logging
 import time
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
 
 from core.settings import Settings
 from core.trace.trace_context import TraceContext
@@ -71,6 +71,7 @@ class IngestionPipeline:
         force: bool = False,
         batch_size: int = DEFAULT_BATCH_SIZE,
         trace: Optional[TraceContext] = None,
+        on_progress: Optional[Callable[[str, int, int], None]] = None,
     ) -> dict:
         """
         对单文件执行完整摄取；失败时抛出明确异常。
@@ -81,6 +82,7 @@ class IngestionPipeline:
             force: 若 True 跳过 integrity 检查强制重新摄取。
             batch_size: 编码批大小。
             trace: 可选追踪上下文。
+            on_progress: 可选进度回调 (stage_name, current, total)，各阶段完成时触发。
 
         Returns:
             摘要 dict：document_id, chunks_count, records_count 等。
@@ -105,6 +107,8 @@ class IngestionPipeline:
             "method": type(self._loader).__name__.lower().replace("loader", "") or "loader",
             "elapsed_ms": round((time.perf_counter() - t0) * 1000, 2),
         })
+        if on_progress is not None:
+            on_progress("load", 1, 1)
 
         # 3. 登记图片到 ImageStorage（Loader 已写入文件）
         images = document.metadata.get("images") if document.metadata else []
@@ -126,6 +130,8 @@ class IngestionPipeline:
         chunks = self._chunker.split_document(document, trace=trace)
         if not chunks:
             logger.warning("文档分块为空: %s", path)
+            if on_progress is not None:
+                on_progress("split", 0, 0)
             if self._integrity is not None and not force:
                 file_hash = self._integrity.compute_sha256(path)
                 self._integrity.mark_success(file_hash, path)
@@ -136,6 +142,8 @@ class IngestionPipeline:
             "method": getattr(self._settings.splitter, "provider", "splitter"),
             "elapsed_ms": round((time.perf_counter() - t1) * 1000, 2),
         })
+        if on_progress is not None:
+            on_progress("split", len(chunks), len(chunks))
 
         # 5. Transform
         t2 = time.perf_counter()
@@ -146,6 +154,8 @@ class IngestionPipeline:
             "method": ",".join(type(x).__name__.lower() for x in self._transforms),
             "elapsed_ms": round((time.perf_counter() - t2) * 1000, 2),
         })
+        if on_progress is not None:
+            on_progress("transform", len(chunks), len(chunks))
 
         # 6. Encode (embed)
         logger.info("编码: %d chunks", len(chunks))
@@ -156,6 +166,8 @@ class IngestionPipeline:
             "method": getattr(self._settings.embedding, "provider", "embedding"),
             "elapsed_ms": round((time.perf_counter() - t3) * 1000, 2),
         })
+        if on_progress is not None:
+            on_progress("embed", len(records), len(records))
 
         # 7. Store (upsert)
         logger.info("写入向量与 BM25 索引")
@@ -167,6 +179,8 @@ class IngestionPipeline:
             "method": getattr(self._settings.vector_store, "provider", "chroma") + ",bm25",
             "elapsed_ms": round((time.perf_counter() - t4) * 1000, 2),
         })
+        if on_progress is not None:
+            on_progress("upsert", 1, 1)
 
         if self._integrity is not None and not force:
             file_hash = self._integrity.compute_sha256(path)
