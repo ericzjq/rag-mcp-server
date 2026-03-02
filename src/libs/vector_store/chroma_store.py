@@ -132,6 +132,14 @@ class ChromaStore(BaseVectorStore):
             })
         return out
 
+    def get_collection_stats(self) -> Dict[str, Any]:
+        """返回集合统计（如 chunk 数量），供 Dashboard 总览展示。"""
+        try:
+            coll = self._get_collection()
+            return {"count": coll.count()}
+        except Exception:
+            return {"count": 0}
+
     def _to_chroma_where(self, filters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """将简单 filters 转为 Chroma where 格式（标量等值）。"""
         if not filters:

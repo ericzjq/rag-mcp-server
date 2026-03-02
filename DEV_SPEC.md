@@ -2029,7 +2029,7 @@ dashboard:
 
 | 任务编号 | 任务名称                 | 状态  | 完成日期 | 备注  |
 | ---- | -------------------- | --- | ---- | --- |
-| G1   | Dashboard 基础架构与系统总览页 | [ ] | -    |     |
+| G1   | Dashboard 基础架构与系统总览页 | [x] | 2026-03-02 | 多页+总览; streamlit 依赖; ConfigService+ChromaStore.get_collection_stats; start_dashboard.py |
 | G2   | DocumentManager 实现   | [ ] | -    |     |
 | G3   | 数据浏览器页面              | [ ] | -    |     |
 | G4   | Ingestion 管理页面       | [ ] | -    |     |
