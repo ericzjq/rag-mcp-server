@@ -1995,7 +1995,7 @@ dashboard:
 | D3   | SparseRetriever（BM25 查询）             | [x] | 2026-03-02 | get_by_ids、query_with_scores、BM25→get_by_ids→RetrievalResult |
 | D4   | RRF Fusion                           | [x] | 2026-03-02 | rrf_fuse(ranked_lists, k)、deterministic、k 可配置 |
 | D5   | HybridSearch 编排                      | [x] | 2026-03-02 | search、_apply_metadata_filters、Dense/Sparse 降级 |
-| D6   | Reranker（Core 层编排 + Fallback）        | [ ] | -    |     |
+| D6   | Reranker（Core 层编排 + Fallback）        | [x] | 2026-03-02 | 接入 libs.reranker、异常时回退并标记 rerank_fallback |
 | D7   | 脚本入口 query.py（查询可用）                  | [ ] | -    |     |
 
 
@@ -2071,13 +2071,13 @@ dashboard:
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
 | 阶段 C   | 15     | 15    | 100%    |
-| 阶段 D   | 7      | 5     | 71%     |
+| 阶段 D   | 7      | 6     | 86%     |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **39** | **57%** |
+| **总计** | **68** | **40** | **59%** |
 
 
 ---
