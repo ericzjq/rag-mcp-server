@@ -11,6 +11,10 @@ from mcp_server.tools.query_knowledge_hub import (
     query_knowledge_hub,
     QUERY_KNOWLEDGE_HUB_SCHEMA,
 )
+from mcp_server.tools.list_collections import (
+    list_collections,
+    LIST_COLLECTIONS_SCHEMA,
+)
 
 
 def _setup_logging() -> None:
@@ -58,6 +62,12 @@ def main() -> int:
         "混合检索 + 精排，返回带引用的 Top-K 片段（Markdown + citations）",
         QUERY_KNOWLEDGE_HUB_SCHEMA,
         query_knowledge_hub,
+    )
+    handler.register_tool(
+        "list_collections",
+        "列举知识库中可用的文档集合（data/documents 下子目录名）",
+        LIST_COLLECTIONS_SCHEMA,
+        list_collections,
     )
     try:
         _run_stdio_loop(handler)
