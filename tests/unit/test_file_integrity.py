@@ -80,3 +80,29 @@ def test_concurrent_writes(tmp_path: Path) -> None:
         checker.mark_success(f"hash_{i:02d}" + "0" * 58, f"file_{i}.pdf")
     for i in range(5):
         assert checker.should_skip(f"hash_{i:02d}" + "0" * 58) is True
+
+
+def test_list_processed_returns_success_records(tmp_path: Path) -> None:
+    """list_processed 返回所有 status=success 的 (file_path, file_hash)。"""
+    db = str(tmp_path / "list.db")
+    checker = SQLiteIntegrityChecker(db_path=db)
+    checker.mark_success("aa" + "0" * 62, "/p/a.pdf")
+    checker.mark_success("bb" + "0" * 62, "/p/b.pdf")
+    checker.mark_failed("cc" + "0" * 62, "error")
+    out = checker.list_processed()
+    assert len(out) == 2
+    paths = {row[0] for row in out}
+    assert paths == {"/p/a.pdf", "/p/b.pdf"}
+
+
+def test_remove_record_deletes_and_returns_true(tmp_path: Path) -> None:
+    """remove_record 删除指定 file_hash 记录并返回 True；不存在返回 False。"""
+    db = str(tmp_path / "rm.db")
+    checker = SQLiteIntegrityChecker(db_path=db)
+    h = "dd" + "0" * 62
+    checker.mark_success(h, "/x.pdf")
+    assert checker.should_skip(h) is True
+    ok = checker.remove_record(h)
+    assert ok is True
+    assert checker.should_skip(h) is False
+    assert checker.remove_record("nonexistent" + "0" * 50) is False

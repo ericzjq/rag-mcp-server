@@ -6,7 +6,7 @@ import hashlib
 import sqlite3
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, Tuple
 
 
 class FileIntegrityChecker(ABC):
@@ -31,6 +31,14 @@ class FileIntegrityChecker(ABC):
     def mark_failed(self, file_hash: str, error_msg: str) -> None:
         """标记该 hash 对应文件摄取失败。"""
         ...
+
+    def list_processed(self) -> List[Tuple[str, str]]:
+        """返回已成功摄取的 (file_path, file_hash) 列表；默认实现可被子类覆盖。"""
+        return []
+
+    def remove_record(self, file_hash: str) -> bool:
+        """移除指定 file_hash 的摄取记录；若不存在返回 False。默认实现可被子类覆盖。"""
+        return False
 
 
 def _sha256_of_file(path: str) -> str:
@@ -101,3 +109,18 @@ class SQLiteIntegrityChecker(FileIntegrityChecker):
                 (file_hash, error_msg, now),
             )
             conn.commit()
+
+    def list_processed(self) -> List[Tuple[str, str]]:
+        """返回已成功摄取的 (file_path, file_hash) 列表。"""
+        with self._get_conn() as conn:
+            cursor = conn.execute(
+                "SELECT file_path, file_hash FROM ingestion_history WHERE status = 'success' ORDER BY file_path"
+            )
+            return [(row[0], row[1]) for row in cursor.fetchall()]
+
+    def remove_record(self, file_hash: str) -> bool:
+        """移除指定 file_hash 的摄取记录；若不存在返回 False。"""
+        with self._get_conn() as conn:
+            cur = conn.execute("DELETE FROM ingestion_history WHERE file_hash = ?", (file_hash,))
+            conn.commit()
+            return cur.rowcount > 0

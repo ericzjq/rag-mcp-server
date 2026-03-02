@@ -126,3 +126,40 @@ class ImageStorage:
             }
             for r in rows
         ]
+
+    def list_by_doc_hash(self, doc_hash: str) -> List[Dict[str, Any]]:
+        """按 doc_hash 查询该文档关联的图片，返回含 image_id、file_path、page_num 等字段的字典列表。"""
+        with self._get_conn() as conn:
+            cursor = conn.execute(
+                "SELECT image_id, file_path, collection, doc_hash, page_num, created_at FROM image_index WHERE doc_hash = ? ORDER BY image_id",
+                (doc_hash,),
+            )
+            rows = cursor.fetchall()
+        return [
+            {
+                "image_id": r[0],
+                "file_path": r[1],
+                "collection": r[2],
+                "doc_hash": r[3],
+                "page_num": r[4],
+                "created_at": r[5],
+            }
+            for r in rows
+        ]
+
+    def delete_by_doc_hash(self, doc_hash: str) -> int:
+        """删除该 doc_hash 对应的所有图片记录及磁盘文件；返回删除的记录数。"""
+        rows = self.list_by_doc_hash(doc_hash)
+        if not rows:
+            return 0
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM image_index WHERE doc_hash = ?", (doc_hash,))
+            conn.commit()
+        for r in rows:
+            fp = r.get("file_path")
+            if fp and Path(fp).exists():
+                try:
+                    Path(fp).unlink()
+                except OSError:
+                    pass
+        return len(rows)

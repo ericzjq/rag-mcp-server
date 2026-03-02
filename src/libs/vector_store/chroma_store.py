@@ -140,6 +140,27 @@ class ChromaStore(BaseVectorStore):
         except Exception:
             return {"count": 0}
 
+    def get_ids_by_metadata(self, filters: Dict[str, Any]) -> List[str]:
+        """按 metadata 条件查询，返回匹配的 id 列表（用于按 source_path 列出/删除 chunk）。"""
+        if not filters:
+            return []
+        where = self._to_chroma_where(filters)
+        if not where:
+            return []
+        coll = self._get_collection()
+        result = coll.get(where=where, include=[])
+        ids = result.get("ids") or []
+        return list(ids)
+
+    def delete_by_metadata(self, filters: Dict[str, Any]) -> int:
+        """按 metadata 条件删除记录，返回删除条数。"""
+        ids = self.get_ids_by_metadata(filters)
+        if not ids:
+            return 0
+        coll = self._get_collection()
+        coll.delete(ids=ids)
+        return len(ids)
+
     def _to_chroma_where(self, filters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """将简单 filters 转为 Chroma where 格式（标量等值）。"""
         if not filters:

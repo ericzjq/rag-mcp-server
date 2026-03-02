@@ -72,3 +72,34 @@ def test_save_rejects_empty_image_id() -> None:
         storage = ImageStorage(db_path=str(Path(tmp) / "db"), images_base=str(Path(tmp) / "imgs"))
         with pytest.raises(ValueError, match="不能为空"):
             storage.save("", b"x")
+
+
+def test_list_by_doc_hash() -> None:
+    """按 doc_hash 查询该文档关联的图片。"""
+    with tempfile.TemporaryDirectory() as tmp:
+        db = Path(tmp) / "idx.db"
+        storage = ImageStorage(db_path=str(db), images_base=str(Path(tmp) / "imgs"))
+        storage.register("p1.png", str(Path(tmp) / "imgs" / "p1.png"), collection="c", doc_hash="doc_a")
+        storage.register("p2.png", str(Path(tmp) / "imgs" / "p2.png"), collection="c", doc_hash="doc_a")
+        storage.register("p3.png", str(Path(tmp) / "imgs" / "p3.png"), collection="c", doc_hash="doc_b")
+        list_a = storage.list_by_doc_hash("doc_a")
+        assert len(list_a) == 2
+        assert {r["image_id"] for r in list_a} == {"p1.png", "p2.png"}
+        assert storage.list_by_doc_hash("doc_b")[0]["image_id"] == "p3.png"
+        assert storage.list_by_doc_hash("unknown") == []
+
+
+def test_delete_by_doc_hash() -> None:
+    """delete_by_doc_hash 删除该 doc_hash 的记录与磁盘文件，返回删除条数。"""
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp) / "imgs"
+        base.mkdir()
+        (base / "f1.png").write_bytes(b"x")
+        db = Path(tmp) / "idx.db"
+        storage = ImageStorage(db_path=str(db), images_base=str(base))
+        storage.register("f1.png", str(base / "f1.png"), doc_hash="d1")
+        n = storage.delete_by_doc_hash("d1")
+        assert n == 1
+        assert storage.list_by_doc_hash("d1") == []
+        assert not (base / "f1.png").exists()
+        assert storage.delete_by_doc_hash("d1") == 0
