@@ -9,6 +9,7 @@ from core.settings import load_settings
 from core.query_engine.hybrid_search import HybridSearch
 from core.query_engine.reranker import Reranker
 from core.response.response_builder import build as build_response
+from core.response.multimodal_assembler import assemble as assemble_images
 
 
 def query_knowledge_hub(
@@ -41,7 +42,11 @@ def query_knowledge_hub(
     results = hybrid.search(query, top_k=top_k, filters=filters)
     if results:
         results = reranker.rerank(query, results)
-    return build_response(results, query)
+    response = build_response(results, query)
+    image_items = assemble_images(results, work_dir=base)
+    if image_items:
+        response["content"].extend(image_items)
+    return response
 
 
 # 供 ProtocolHandler 注册用的 schema

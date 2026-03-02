@@ -2009,7 +2009,7 @@ dashboard:
 | E3   | query_knowledge_hub Tool   | [x] | 2026-03-02 | ResponseBuilder + CitationGenerator、Markdown+citations、无结果友好提示、server 注册 |
 | E4   | list_collections Tool      | [x] | 2026-03-02 | data/documents 子目录为集合名、content+structuredContent、fixtures 验收 |
 | E5   | get_document_summary Tool  | [x] | 2026-03-02 | doc_id→title/summary/tags、metadata 文件或 _store、不存在返回 structuredContent.error |
-| E6   | 多模态返回组装（Text + Image）      | [ ] | -    |     |
+| E6   | 多模态返回组装（Text + Image）      | [x] | 2026-03-02 | multimodal_assembler、metadata.images→ImageContent、mimeType/base64、query_knowledge_hub 接入 |
 
 
 #### 阶段 F：Trace 基础设施与打点
@@ -2072,12 +2072,12 @@ dashboard:
 | 阶段 B   | 16     | 16    | 100%    |
 | 阶段 C   | 15     | 15    | 100%    |
 | 阶段 D   | 7      | 7     | 100%    |
-| 阶段 E   | 6      | 5     | 83%     |
+| 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **46** | **68%** |
+| **总计** | **68** | **47** | **69%** |
 
 
 ---

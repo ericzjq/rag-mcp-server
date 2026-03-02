@@ -87,3 +87,37 @@ def test_query_knowledge_hub_returns_markdown_and_citations() -> None:
     assert "structuredContent" in result
     assert "citations" in result["structuredContent"]
     assert isinstance(result["structuredContent"]["citations"], list)
+
+
+def test_image_content_in_tool_result(tmp_path: Path) -> None:
+    """当检索结果含 image_refs 时，content 中包含 image type、mimeType 正确、data 为 base64。"""
+    import base64
+
+    from core.response.multimodal_assembler import assemble
+    from core.response.response_builder import build
+    from core.types import RetrievalResult
+
+    png_bytes = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    )
+    img_dir = tmp_path / "data" / "images" / "coll"
+    img_dir.mkdir(parents=True)
+    (img_dir / "ref.png").write_bytes(png_bytes)
+
+    results = [
+        RetrievalResult(
+            "c1",
+            0.9,
+            "Snippet.",
+            {"images": [{"id": "i1", "path": "data/images/coll/ref.png"}]},
+        ),
+    ]
+    response = build(results, "q")
+    image_items = assemble(results, work_dir=str(tmp_path))
+    response["content"].extend(image_items)
+
+    assert any(c.get("type") == "image" for c in response["content"])
+    img = next(c for c in response["content"] if c.get("type") == "image")
+    assert img.get("mimeType") == "image/png"
+    assert isinstance(img.get("data"), str)
+    base64.b64decode(img["data"])
