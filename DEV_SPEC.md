@@ -1994,7 +1994,7 @@ dashboard:
 | D2   | DenseRetriever（调用 VectorStore.query） | [x] | 2026-03-02 | RetrievalResult、ChromaStore.text、embed+query→List[RetrievalResult] |
 | D3   | SparseRetriever（BM25 查询）             | [x] | 2026-03-02 | get_by_ids、query_with_scores、BM25→get_by_ids→RetrievalResult |
 | D4   | RRF Fusion                           | [x] | 2026-03-02 | rrf_fuse(ranked_lists, k)、deterministic、k 可配置 |
-| D5   | HybridSearch 编排                      | [ ] | -    |     |
+| D5   | HybridSearch 编排                      | [x] | 2026-03-02 | search、_apply_metadata_filters、Dense/Sparse 降级 |
 | D6   | Reranker（Core 层编排 + Fallback）        | [ ] | -    |     |
 | D7   | 脚本入口 query.py（查询可用）                  | [ ] | -    |     |
 
@@ -2071,13 +2071,13 @@ dashboard:
 | 阶段 A   | 3      | 3     | 100%    |
 | 阶段 B   | 16     | 16    | 100%    |
 | 阶段 C   | 15     | 15    | 100%    |
-| 阶段 D   | 7      | 4     | 57%     |
+| 阶段 D   | 7      | 5     | 71%     |
 | 阶段 E   | 6      | 0     | 0%      |
 | 阶段 F   | 5      | 0     | 0%      |
 | 阶段 G   | 6      | 0     | 0%      |
 | 阶段 H   | 5      | 0     | 0%      |
 | 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **38** | **56%** |
+| **总计** | **68** | **39** | **57%** |
 
 
 ---
