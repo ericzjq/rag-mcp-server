@@ -7,6 +7,10 @@ import logging
 import sys
 
 from mcp_server.protocol_handler import ProtocolHandler
+from mcp_server.tools.query_knowledge_hub import (
+    query_knowledge_hub,
+    QUERY_KNOWLEDGE_HUB_SCHEMA,
+)
 
 
 def _setup_logging() -> None:
@@ -48,8 +52,15 @@ def _run_stdio_loop(handler: ProtocolHandler) -> None:
 
 def main() -> int:
     _setup_logging()
+    handler = ProtocolHandler()
+    handler.register_tool(
+        "query_knowledge_hub",
+        "混合检索 + 精排，返回带引用的 Top-K 片段（Markdown + citations）",
+        QUERY_KNOWLEDGE_HUB_SCHEMA,
+        query_knowledge_hub,
+    )
     try:
-        _run_stdio_loop(ProtocolHandler())
+        _run_stdio_loop(handler)
     except Exception:  # pragma: no cover
         logging.getLogger(__name__).exception("Server error")
         return 1

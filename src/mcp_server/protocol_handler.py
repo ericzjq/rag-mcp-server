@@ -66,6 +66,8 @@ class ProtocolHandler:
             raise ProtocolError(METHOD_NOT_FOUND, "Tool not found")
         try:
             result = self._tool_handlers[name](**arguments)
+            if isinstance(result, dict) and "content" in result:
+                return result
             return {"content": result if isinstance(result, list) else [result]}
         except TypeError as e:
             raise ProtocolError(INVALID_PARAMS, str(e))

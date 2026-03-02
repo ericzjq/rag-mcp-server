@@ -48,3 +48,42 @@ def test_mcp_server_initialize_returns_server_info_and_capabilities() -> None:
     # stderr 有日志，stdout 不污染
     assert len(stderr_content) > 0, "stderr should contain log output"
     assert "MCP server started" in stderr_content or "started" in stderr_content.lower()
+
+
+def test_query_knowledge_hub_returns_markdown_and_citations() -> None:
+    """tools/call query_knowledge_hub 返回 content[0] 为 Markdown、structuredContent.citations 为列表。"""
+    env = {**os.environ, "PYTHONPATH": os.path.pathsep.join([str(SRC), str(PROJECT_ROOT)])}
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "mcp_server.server"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=str(PROJECT_ROOT),
+        env=env,
+        text=True,
+    )
+    assert proc.stdin is not None and proc.stdout is not None
+    # initialize
+    proc.stdin.write('{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n')
+    proc.stdin.flush()
+    _ = proc.stdout.readline()
+    # tools/call query_knowledge_hub
+    proc.stdin.write(
+        '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query_knowledge_hub","arguments":{"query":"测试查询"}}}\n'
+    )
+    proc.stdin.flush()
+    proc.stdin.close()
+    out_line = proc.stdout.readline()
+    proc.wait(timeout=10)
+
+    payload = json.loads(out_line.strip())
+    assert payload.get("id") == 2
+    assert "result" in payload, payload
+    result = payload["result"]
+    assert "content" in result
+    assert len(result["content"]) >= 1
+    assert result["content"][0].get("type") == "text"
+    assert "text" in result["content"][0]
+    assert "structuredContent" in result
+    assert "citations" in result["structuredContent"]
+    assert isinstance(result["structuredContent"]["citations"], list)
