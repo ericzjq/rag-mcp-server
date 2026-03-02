@@ -1,8 +1,9 @@
 """
-HybridSearch（D5）：编排 QueryProcessor + Dense + Sparse + Fusion，支持 filters 与单路降级。
+HybridSearch（D5）：编排 QueryProcessor + Dense + Sparse + Fusion，支持 filters 与单路降级。F3 打点。
 """
 
 import logging
+import time
 from typing import Any, Callable, List, Optional
 
 from core.settings import Settings
@@ -60,18 +61,37 @@ class HybridSearch:
         """
         if not (query or "").strip():
             return []
+        t0 = time.perf_counter()
         processed = self._qp.process(query.strip())
+        if trace is not None:
+            trace.record_stage("query_processing", {
+                "method": "query_processor",
+                "elapsed_ms": round((time.perf_counter() - t0) * 1000, 2),
+            })
         fetch_k = max(top_k, 1) * _RETRIEVE_MULTIPLIER
         dense_list: List[RetrievalResult] = []
         sparse_list: List[RetrievalResult] = []
+        t1 = time.perf_counter()
         try:
             dense_list = self._dense.retrieve(query, fetch_k, filters=filters, trace=trace)
         except Exception as e:
             logger.warning("Dense 检索失败，将仅用 Sparse 结果: %s", e)
+        if trace is not None:
+            trace.record_stage("dense_retrieval", {
+                "method": getattr(self._settings.vector_store, "provider", "vector_store"),
+                "elapsed_ms": round((time.perf_counter() - t1) * 1000, 2),
+            })
+        t2 = time.perf_counter()
         try:
             sparse_list = self._sparse.retrieve(processed.keywords, fetch_k, trace=trace)
         except Exception as e:
             logger.warning("Sparse 检索失败，将仅用 Dense 结果: %s", e)
+        if trace is not None:
+            trace.record_stage("sparse_retrieval", {
+                "method": "bm25",
+                "elapsed_ms": round((time.perf_counter() - t2) * 1000, 2),
+            })
+        t3 = time.perf_counter()
         if dense_list and sparse_list:
             fused = self._fusion_fn([dense_list, sparse_list], k=self._rrf_k)
         elif dense_list:
@@ -80,6 +100,11 @@ class HybridSearch:
             fused = sparse_list
         else:
             return []
+        if trace is not None:
+            trace.record_stage("fusion", {
+                "method": "rrf",
+                "elapsed_ms": round((time.perf_counter() - t3) * 1000, 2),
+            })
         filtered = self._apply_metadata_filters(fused, filters)
         return filtered[:top_k]
 

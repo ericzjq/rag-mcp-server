@@ -95,3 +95,34 @@ def test_hybrid_search_fallback_when_sparse_fails() -> None:
     results = hybrid.search("q", top_k=5)
     assert len(results) >= 1
     assert results[0].chunk_id == "d1" and results[0].text == "Only dense."
+
+
+def test_query_trace_contains_stages_and_trace_type() -> None:
+    """一次查询生成 trace，包含 query_processing/dense_retrieval/sparse_retrieval/fusion/rerank，trace_type=query。"""
+    from core.trace.trace_context import TraceContext
+    from core.query_engine.reranker import Reranker
+
+    dense = _MockDenseRetriever([_result("c1", 0.9, "Dense.")])
+    sparse = _MockSparseRetriever([_result("c2", 0.8, "Sparse.")])
+    settings = _make_settings()
+    hybrid = HybridSearch(settings, dense_retriever=dense, sparse_retriever=sparse)
+    mock_backend = MagicMock()
+    mock_backend.rerank = lambda query, candidates, trace=None: list(candidates)
+    reranker = Reranker(settings, backend=mock_backend)
+    trace = TraceContext(trace_type="query")
+
+    results = hybrid.search("test", top_k=5, trace=trace)
+    results = reranker.rerank("test", results, trace=trace)
+    trace.finish()
+
+    d = trace.to_dict()
+    assert d["trace_type"] == "query"
+    stages = d["stages"]
+    assert "query_processing" in stages
+    assert "dense_retrieval" in stages
+    assert "sparse_retrieval" in stages
+    assert "fusion" in stages
+    assert "rerank" in stages
+    for name in ("query_processing", "dense_retrieval", "sparse_retrieval", "fusion", "rerank"):
+        assert "elapsed_ms" in stages[name]
+        assert "method" in stages[name]

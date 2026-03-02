@@ -1,8 +1,9 @@
 """
-Reranker（D6）：Core 层编排，接入 libs.reranker 后端；失败/超时回退 fusion 排名并标记 fallback。
+Reranker（D6）：Core 层编排，接入 libs.reranker 后端；失败/超时回退 fusion 排名并标记 fallback。F3 打点。
 """
 
 import logging
+import time
 from typing import Any, List, Optional
 
 from core.settings import Settings
@@ -66,13 +67,14 @@ class Reranker:
         """
         if not candidates:
             return []
+        t0 = time.perf_counter()
         try:
             raw = _to_candidates(candidates)
             out = self._backend.rerank(query, raw, trace=trace)
-            return _from_candidates(out)
+            result = _from_candidates(out)
         except Exception as e:
             logger.warning("Reranker 后端异常，回退到 fusion 排名: %s", e)
-            return [
+            result = [
                 RetrievalResult(
                     chunk_id=r.chunk_id,
                     score=r.score,
@@ -81,3 +83,9 @@ class Reranker:
                 )
                 for r in candidates
             ]
+        if trace is not None:
+            trace.record_stage("rerank", {
+                "method": getattr(self._settings.rerank, "provider", "reranker"),
+                "elapsed_ms": round((time.perf_counter() - t0) * 1000, 2),
+            })
+        return result
