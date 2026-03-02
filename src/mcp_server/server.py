@@ -6,6 +6,8 @@ import json
 import logging
 import sys
 
+from mcp_server.protocol_handler import ProtocolHandler
+
 
 def _setup_logging() -> None:
     """将根 logger 的 handler 设为 stderr，避免污染 stdout。"""
@@ -17,20 +19,8 @@ def _setup_logging() -> None:
         root.addHandler(h)
 
 
-def _handle_initialize(params: dict) -> dict:
-    """处理 initialize：返回 serverInfo 与 capabilities（E2 将迁至 ProtocolHandler）。"""
-    return {
-        "protocolVersion": "2024-11-05",
-        "capabilities": {"tools": {}},
-        "serverInfo": {
-            "name": "mcp-server",
-            "version": "0.1.0",
-        },
-    }
-
-
-def _run_stdio_loop() -> None:
-    """从 stdin 逐行读 JSON-RPC 请求，仅将 JSON-RPC 响应写入 stdout。"""
+def _run_stdio_loop(handler: ProtocolHandler) -> None:
+    """从 stdin 逐行读 JSON-RPC 请求，经 ProtocolHandler 分发，仅将 JSON-RPC 响应写入 stdout。"""
     logger = logging.getLogger(__name__)
     logger.info("MCP server started (stdio)")
 
@@ -51,19 +41,7 @@ def _run_stdio_loop() -> None:
             sys.stdout.flush()
             continue
 
-        req_id = msg.get("id")
-        method = msg.get("method")
-        params = msg.get("params") or {}
-
-        if method == "initialize":
-            result = _handle_initialize(params)
-            resp = {"jsonrpc": "2.0", "id": req_id, "result": result}
-        else:
-            resp = {
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "error": {"code": -32601, "message": "Method not found"},
-            }
+        resp = handler.handle_request(msg)
         sys.stdout.write(json.dumps(resp) + "\n")
         sys.stdout.flush()
 
@@ -71,7 +49,7 @@ def _run_stdio_loop() -> None:
 def main() -> int:
     _setup_logging()
     try:
-        _run_stdio_loop()
+        _run_stdio_loop(ProtocolHandler())
     except Exception:  # pragma: no cover
         logging.getLogger(__name__).exception("Server error")
         return 1
