@@ -104,3 +104,35 @@ class ChunkRecord:
             dense_vector=data.get("dense_vector"),
             sparse_vector=data.get("sparse_vector"),
         )
+
+
+# ---------------------------------------------------------------------------
+# 检索结果（D2 起）：DenseRetriever / SparseRetriever 统一返回
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class RetrievalResult:
+    """单条检索结果：chunk_id、score、text、metadata。"""
+
+    chunk_id: str
+    score: float
+    text: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "chunk_id": self.chunk_id,
+            "score": self.score,
+            "text": self.text,
+            "metadata": dict(self.metadata),
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "RetrievalResult":
+        return cls(
+            chunk_id=str(data["chunk_id"]),
+            score=float(data["score"]),
+            text=str(data.get("text", "")),
+            metadata=dict(data.get("metadata", {})),
+        )

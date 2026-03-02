@@ -103,9 +103,12 @@ class ChromaStore(BaseVectorStore):
             score = float(1.0 - (dist / 2.0)) if isinstance(dist, (int, float)) else 0.0
             meta = metadatas[i] if i < len(metadatas) else {}
             text = documents[i] if i < len(documents) else ""
-            item = {"id": vid, "score": score, "metadata": meta or {}}
-            if text is not None:
-                item["text"] = text
+            item = {
+                "id": vid,
+                "score": score,
+                "metadata": meta or {},
+                "text": text if text is not None else "",
+            }
             out.append(item)
         return out
 

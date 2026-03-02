@@ -5,6 +5,7 @@ from core.types import (
     ChunkRecord,
     Document,
     ImageRef,
+    RetrievalResult,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "ChunkRecord",
     "Document",
     "ImageRef",
+    "RetrievalResult",
 ]
