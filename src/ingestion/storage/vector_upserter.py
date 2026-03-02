@@ -58,10 +58,12 @@ class VectorUpserter:
             sid = compute_stable_id(r)
             ids.append(sid)
             if r.dense_vector is not None:
+                meta = dict(r.metadata) if r.metadata else {}
+                meta["text"] = r.text  # ChromaStore 需要 documents 来自 metadata.text
                 store_records.append({
                     "id": sid,
                     "vector": list(r.dense_vector),
-                    "metadata": dict(r.metadata) if r.metadata else {},
+                    "metadata": meta,
                 })
         if store_records:
             self._store.upsert(store_records, trace=trace)

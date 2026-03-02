@@ -79,6 +79,25 @@ class ImageStorage:
             conn.commit()
         return path_str
 
+    def register(
+        self,
+        image_id: str,
+        file_path: str,
+        collection: str = "",
+        doc_hash: Optional[str] = None,
+        page_num: Optional[int] = None,
+    ) -> None:
+        """仅将已有文件的映射写入索引（不复制文件）；用于 Loader 已写入文件后的登记。"""
+        if not image_id.strip():
+            raise ValueError("image_id 不能为空")
+        with self._get_conn() as conn:
+            conn.execute(
+                """INSERT OR REPLACE INTO image_index (image_id, file_path, collection, doc_hash, page_num)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (image_id, file_path, collection.strip() or None, doc_hash, page_num),
+            )
+            conn.commit()
+
     def get_path(self, image_id: str) -> Optional[str]:
         """根据 image_id 查找已存储的文件路径；不存在返回 None。"""
         with self._get_conn() as conn:
