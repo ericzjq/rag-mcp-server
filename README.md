@@ -79,6 +79,8 @@ python scripts/query.py --query "你的问题" --top-k 5
 
 ## 🔌 MCP 配置示例
 
+**Cursor 用户**：本仓库已包含 `.cursor/mcp.json`，将本 Server 注册为 **mcp_rag_tool**。用 Cursor 打开本仓库根目录并重启 Cursor 即可使用。详见 [docs/CURSOR_MCP_SETUP.md](docs/CURSOR_MCP_SETUP.md)。
+
 ### GitHub Copilot
 
 在 Copilot 使用的 MCP 配置（如 `mcp.json`）中增加本 Server：
