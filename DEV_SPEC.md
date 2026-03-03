@@ -2058,7 +2058,7 @@ dashboard:
 | 任务编号 | 任务名称                              | 状态  | 完成日期 | 备注  |
 | ---- | --------------------------------- | --- | ---- | --- |
 | I1   | E2E：MCP Client 侧调用模拟              | [x] | 2026-03-03 | tests/e2e/test_mcp_client.py；initialize→tools/list→tools/call query_knowledge_hub→citations |
-| I2   | E2E：Dashboard 冒烟测试                | [ ] | -    |     |
+| I2   | E2E：Dashboard 冒烟测试                | [x] | 2026-03-03 | test_dashboard_smoke.py、AppTest.from_string 六页加载无异常 |
 | I3   | 完善 README（运行说明 + MCP + Dashboard） | [ ] | -    |     |
 | I4   | 清理接口一致性（契约测试补齐）                   | [ ] | -    |     |
 | I5   | 全链路 E2E 验收                        | [ ] | -    |     |
@@ -2080,8 +2080,8 @@ dashboard:
 | 阶段 F   | 5      | 5     | 100%    |
 | 阶段 G   | 6      | 6     | 100%    |
 | 阶段 H   | 6      | 6     | 100%    |
-| 阶段 I   | 6      | 2     | 33%     |
-| **总计** | **71** | **63** | **89%** |
+| 阶段 I   | 6      | 3     | 50%     |
+| **总计** | **71** | **64** | **90%** |
 
 
 ---
