@@ -2045,8 +2045,8 @@ dashboard:
 | H1   | RagasEvaluator 实现            | [x] | 2026-03-03 | ragas_evaluator.py + 工厂注册；Faithfulness/AnswerRelevancy/ContextPrecision；未安装时 ImportError |
 | H2   | CompositeEvaluator 实现        | [x] | 2026-03-03 | composite_evaluator.py；并行执行、按类名前缀合并 metrics；空列表 ValueError |
 | H3   | EvalRunner + Golden Test Set | [x] | 2026-03-03 | eval_runner.py + EvalReport；golden_test_set.json；scripts/evaluate.py；test_eval_runner |
-| H4   | 评估面板页面                       | [ ] | -    |     |
-| H5   | Recall 回归测试（E2E）             | [ ] | -    |     |
+| H4   | 评估面板页面                       | [x] | 2026-03-03 | evaluation_panel.py；golden test set 路径、运行评估、hit_rate/mrr、各 query 明细 |
+| H5   | Recall 回归测试（E2E）             | [x] | 2026-03-03 | tests/e2e/test_recall.py，mock 检索、hit_rate>=0 阈值 |
 
 
 #### 阶段 I：端到端验收与文档收口
@@ -2076,9 +2076,9 @@ dashboard:
 | 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 5     | 100%    |
 | 阶段 G   | 6      | 6     | 100%    |
-| 阶段 H   | 5      | 3     | 60%     |
+| 阶段 H   | 5      | 5     | 100%    |
 | 阶段 I   | 6      | 1     | 17%     |
-| **总计** | **69** | **58** | **84%** |
+| **总计** | **69** | **60** | **87%** |
 
 
 ---
@@ -3179,6 +3179,14 @@ dashboard:
   - `tests/fixtures/golden_test_set.json`（补齐若干条）
 - **验收标准**：hit@k 达到阈值（阈值写死在测试里，便于回归）。
 - **测试方法**：`pytest -q tests/e2e/test_recall.py`。
+
+### 阶段 H 可优化点（可选）
+
+- **Ingestion 管理页阶段级进度**：
+  - **背景**：大文档（如 16MB）摄取时，transform/embed 阶段耗时长，当前仅展示「摄取中…」spinner，用户无法感知当前阶段与进度，易误判为卡死。
+  - **优化**：在 Ingestion 管理页调用 `IngestionPipeline.run(on_progress=...)` 时，利用已有回调驱动阶段级进度展示（如 `st.progress` 按 load/split/transform/embed/upsert 分步更新，或文案显示「当前：transform 3/20」）。
+  - **修改文件**：`src/observability/dashboard/pages/ingestion_manager.py`
+  - **验收**：摄取过程中可看到当前阶段或进度变化，大文档等待体验可预期。
 
 ---
 
