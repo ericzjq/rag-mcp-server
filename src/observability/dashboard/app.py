@@ -20,6 +20,7 @@ from observability.dashboard.pages.overview import run as overview_run
 from observability.dashboard.pages.data_browser import run as data_browser_run
 from observability.dashboard.pages.ingestion_manager import run as ingestion_manager_run
 from observability.dashboard.pages.ingestion_traces import run as ingestion_traces_run
+from observability.dashboard.pages.query_traces import run as query_traces_run
 
 
 def _placeholder(title: str):
@@ -35,7 +36,7 @@ def main() -> None:
         st.Page(data_browser_run, title="数据浏览器"),
         st.Page(ingestion_manager_run, title="Ingestion 管理"),
         st.Page(ingestion_traces_run, title="Ingestion 追踪"),
-        st.Page(_placeholder("Query 追踪"), title="Query 追踪"),
+        st.Page(query_traces_run, title="Query 追踪"),
         st.Page(_placeholder("评估"), title="评估"),
     ]
     pg = st.navigation(pages)
