@@ -2,6 +2,7 @@
 VectorStore 契约测试：约束 BaseVectorStore 的输入输出 shape。
 """
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -25,14 +26,17 @@ from libs.vector_store.base_vector_store import (
 from libs.vector_store.vector_store_factory import create, register_vector_store_provider
 
 
-def _make_settings(vector_store_provider: str = "chroma") -> Settings:
+def _make_settings(
+    vector_store_provider: str = "chroma",
+    persist_directory: str = "data/chroma",
+) -> Settings:
     """构建用于测试的 Settings。"""
     return Settings(
         llm=LlmSettings(provider="openai", model="gpt-4o-mini"),
         embedding=EmbeddingSettings(provider="openai", model="text-embedding-3-small"),
         vector_store=VectorStoreSettings(
             provider=vector_store_provider,
-            persist_directory="data/chroma",
+            persist_directory=persist_directory,
         ),
         retrieval=RetrievalSettings(top_k=10, rerank_top_m=20),
         rerank=RerankSettings(provider="none"),
@@ -126,3 +130,29 @@ def test_factory_unknown_provider_raises() -> None:
         create(_make_settings(vector_store_provider="unknown_vs"))
     assert "unknown_vs" in str(exc_info.value)
     assert "Unknown VectorStore provider" in str(exc_info.value)
+
+
+def test_delete_by_metadata_boundaries(tmp_path: Path) -> None:
+    """ChromaStore delete_by_metadata 边界：空 filters 返回 0；无匹配返回 0；有匹配返回删除条数。"""
+    from libs.vector_store.chroma_store import ChromaStore
+
+    persist_dir = str(tmp_path / "chroma")
+    settings = _make_settings(persist_directory=persist_dir)
+    store = ChromaStore(settings)
+    assert hasattr(store, "delete_by_metadata")
+
+    # 空 filters：不删除任何记录，返回 0
+    n = store.delete_by_metadata({})
+    assert n == 0
+
+    # 写入两条同 source_path
+    store.upsert([
+        {"id": "id1", "vector": [0.1, 0.2], "metadata": {"source_path": "/a/doc.pdf", "text": "t1"}},
+        {"id": "id2", "vector": [0.2, 0.3], "metadata": {"source_path": "/a/doc.pdf", "text": "t2"}},
+    ], trace=None)
+    n = store.delete_by_metadata({"source_path": "/a/doc.pdf"})
+    assert n == 2
+
+    # 无匹配：返回 0
+    n = store.delete_by_metadata({"source_path": "/nonexistent.pdf"})
+    assert n == 0

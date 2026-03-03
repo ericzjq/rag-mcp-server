@@ -89,3 +89,29 @@ def test_factory_unknown_provider_raises() -> None:
     with pytest.raises(ValueError) as exc_info:
         create(_make_settings(evaluation_provider="unknown_eval"))
     assert "unknown_eval" in str(exc_info.value)
+
+
+def test_evaluate_empty_retrieved_ids() -> None:
+    """retrieved_ids 为空时 hit_rate=0, mrr=0。"""
+    ev = CustomEvaluator(_make_settings())
+    metrics = ev.evaluate(
+        query="q",
+        retrieved_ids=[],
+        golden_ids=["a", "b"],
+        trace=None,
+    )
+    assert metrics["hit_rate"] == 0.0
+    assert metrics["mrr"] == 0.0
+
+
+def test_evaluate_empty_golden_ids() -> None:
+    """golden_ids 为空时无命中，hit_rate=0, mrr=0。"""
+    ev = CustomEvaluator(_make_settings())
+    metrics = ev.evaluate(
+        query="q",
+        retrieved_ids=["a", "b"],
+        golden_ids=[],
+        trace=None,
+    )
+    assert metrics["hit_rate"] == 0.0
+    assert metrics["mrr"] == 0.0

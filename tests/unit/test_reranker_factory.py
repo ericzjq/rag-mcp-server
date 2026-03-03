@@ -65,3 +65,10 @@ def test_none_reranker_preserves_list_identity() -> None:
     result = reranker.rerank("q", candidates, trace=None)
     assert result is not candidates
     assert result == candidates
+
+
+def test_none_reranker_empty_candidates_returns_empty_list() -> None:
+    """空候选列表时 rerank 返回空列表，不抛异常。"""
+    reranker = create(_make_settings(rerank_provider="none"))
+    result = reranker.rerank("query", [], trace=None)
+    assert result == []

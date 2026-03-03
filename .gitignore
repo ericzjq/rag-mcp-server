@@ -51,3 +51,6 @@ logs/*.jsonl
 
 # 项目总结（简历用，不纳入版本库）
 INTERVIEW.md
+
+# 测试用 PDF（勿提交）
+tests/fixtures/sample_documents/*.pdf
