@@ -52,8 +52,9 @@ class IngestionPipeline:
         self._integrity = integrity_checker
         self._loader = loader if loader is not None else PdfLoader(images_base_dir="data/images")
         self._chunker = chunker if chunker is not None else DocumentChunker(settings)
+        # 默认 ChunkRefiner use_llm=False，避免大文档时对每个 chunk 调 LLM（225 条即 225 次调用）导致 transform 极慢
         self._transforms = transforms if transforms is not None else [
-            ChunkRefiner(settings),
+            ChunkRefiner(settings, use_llm=False),
             MetadataEnricher(settings),
             ImageCaptioner(settings),
         ]
@@ -145,7 +146,9 @@ class IngestionPipeline:
         if on_progress is not None:
             on_progress("split", len(chunks), len(chunks))
 
-        # 5. Transform
+        # 5. Transform（可能较慢：ChunkRefiner/MetadataEnricher/ImageCaptioner 会调 LLM）
+        if on_progress is not None:
+            on_progress("transform", 0, len(chunks))
         t2 = time.perf_counter()
         for i, t in enumerate(self._transforms):
             chunks = t.transform(chunks, trace=trace)
@@ -157,7 +160,9 @@ class IngestionPipeline:
         if on_progress is not None:
             on_progress("transform", len(chunks), len(chunks))
 
-        # 6. Encode (embed)
+        # 6. Encode (embed)（可能较慢：调用 embedding API 分批处理）
+        if on_progress is not None:
+            on_progress("embed", 0, len(chunks))
         logger.info("编码: %d chunks", len(chunks))
         t3 = time.perf_counter()
         records = self._batch_processor.process(chunks, batch_size=batch_size, trace=trace)

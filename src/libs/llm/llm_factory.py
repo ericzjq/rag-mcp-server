@@ -12,6 +12,7 @@ from libs.llm.openai_llm import OpenAILLM
 from libs.llm.azure_llm import AzureLLM
 from libs.llm.azure_vision_llm import AzureVisionLLM
 from libs.llm.deepseek_llm import DeepSeekLLM
+from libs.llm.deepseek_vision_llm import DeepSeekVisionLLM
 from libs.llm.ollama_llm import OllamaLLM
 
 # Provider 名称 -> 实现类（B7.1 openai/azure/deepseek，B7.2 ollama）
@@ -23,9 +24,10 @@ _PROVIDERS: Dict[str, Type[BaseLLM]] = {
 }
 
 
-# Vision LLM：B8 抽象与工厂，B9 Azure 实现
+# Vision LLM：B8 抽象与工厂，B9 Azure，DeepSeek Vision（OpenAI 兼容多模态）
 _VISION_PROVIDERS: Dict[str, Type[BaseVisionLLM]] = {
     "azure": AzureVisionLLM,
+    "deepseek": DeepSeekVisionLLM,
 }
 
 

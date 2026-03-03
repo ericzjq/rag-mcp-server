@@ -30,6 +30,25 @@ splitter:
 evaluation:
   provider: ragas
 
+# Vision LLM（可选）：Transform 阶段 ImageCaptioner 用其做 PDF 图转文（语意识别）。
+# 未配置时，含图片的 chunk 不会调多模态接口，仅标记 has_unprocessed_images。
+# 支持 provider: azure（Azure OpenAI）或 deepseek（DeepSeek 视觉模型，OpenAI 兼容接口）。
+# 使用 DeepSeek 示例（与主 LLM 共用 api_key/base_url 即可）：
+# vision_llm:
+#   provider: deepseek
+#   api_key: ""                    # 同 llm，或单独申请
+#   base_url: https://api.deepseek.com
+#   model: deepseek-chat            # 若 DeepSeek 提供视觉模型，改为对应 model 名
+#   max_image_size: 2048
+# 使用 Azure 示例：
+# vision_llm:
+#   provider: azure
+#   api_key: ""
+#   azure_endpoint: https://xxx.openai.azure.com
+#   api_version: "2024-02-15-preview"
+#   deployment_name: gpt-4o
+#   max_image_size: 2048
+
 observability:
   log_level: INFO
   traces_path: logs/traces.jsonl

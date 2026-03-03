@@ -1961,6 +1961,7 @@ dashboard:
 | B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | mock scorer、超时/失败回退、长度不一致回退                  |
 | B8   | Vision LLM 抽象接口与工厂集成        | [x] | 2025-03-01 | BaseVisionLLM、ChatResponse、create_vision_llm、Fake 测试   |
 | B9   | Azure Vision LLM 实现         | [x] | 2025-03-01 | AzureVisionLLM、路径/base64、max_image_size、mock 测试        |
+| B9.1 | DeepSeek Vision LLM 实现      | [x] | 2026-03-03 | VisionLlmSettings 扩展 base_url/model；deepseek_vision_llm.py；工厂注册 provider=deepseek；图转文配置示例 |
 
 
 #### 阶段 C：Ingestion Pipeline MVP
@@ -2047,6 +2048,7 @@ dashboard:
 | H3   | EvalRunner + Golden Test Set | [x] | 2026-03-03 | eval_runner.py + EvalReport；golden_test_set.json；scripts/evaluate.py；test_eval_runner |
 | H4   | 评估面板页面                       | [x] | 2026-03-03 | evaluation_panel.py；golden test set 路径、运行评估、hit_rate/mrr、各 query 明细 |
 | H5   | Recall 回归测试（E2E）             | [x] | 2026-03-03 | tests/e2e/test_recall.py，mock 检索、hit_rate>=0 阈值 |
+| H可优化 | Ingestion 管理页阶段级进度（可选） | [x] | 2026-03-03 | ingestion_manager.py：st.progress + 阶段文案，on_progress 驱动 |
 
 
 #### 阶段 I：端到端验收与文档收口
@@ -2070,15 +2072,15 @@ dashboard:
 | 阶段     | 总任务数   | 已完成   | 进度      |
 | ------ | ------ | ----- | ------- |
 | 阶段 A   | 3      | 3     | 100%    |
-| 阶段 B   | 16     | 16    | 100%    |
+| 阶段 B   | 17     | 17    | 100%    |
 | 阶段 C   | 15     | 15    | 100%    |
 | 阶段 D   | 7      | 7     | 100%    |
 | 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 5     | 100%    |
 | 阶段 G   | 6      | 6     | 100%    |
-| 阶段 H   | 5      | 5     | 100%    |
+| 阶段 H   | 6      | 6     | 100%    |
 | 阶段 I   | 6      | 2     | 33%     |
-| **总计** | **69** | **61** | **88%** |
+| **总计** | **71** | **63** | **89%** |
 
 
 ---
@@ -2363,6 +2365,19 @@ dashboard:
   - API 调用失败时抛出清晰错误，包含 Azure 特有错误码。
   - mock 测试覆盖：正常调用、图片压缩、超时、认证失败等场景。
 - **测试方法**：`pytest -q tests/unit/test_azure_vision_llm.py`。
+
+### B9.1：DeepSeek Vision LLM 实现
+
+- **状态**：已完成（2026-03-03）。备注：VisionLlmSettings 扩展 base_url/model；deepseek_vision_llm.py；工厂注册 provider=deepseek；Transform 阶段 PDF 图转文可选用 DeepSeek。
+- **目标**：支持通过 DeepSeek API（OpenAI 兼容多模态接口）进行图像理解，供 ImageCaptioner 做 PDF 图转文。
+- **修改文件**：
+  - `src/core/settings.py`（VisionLlmSettings 增加 base_url、model）
+  - `src/libs/llm/deepseek_vision_llm.py`（新增）
+  - `src/libs/llm/llm_factory.py`（注册 deepseek）
+  - `config/settings.yaml.example`（vision_llm 示例含 deepseek）
+  - `tests/unit/test_vision_llm_factory.py`（test_create_vision_llm_deepseek_returns_deepseek_vision_llm）
+- **验收标准**：vision_llm.provider=deepseek 且配置 base_url/model/api_key 时，create_vision_llm 返回 DeepSeekVisionLLM；调用方式与 Azure Vision 一致（chat completions + image_url）。
+- **测试方法**：`pytest -q tests/unit/test_vision_llm_factory.py`。
 
 ---
 
@@ -3182,11 +3197,12 @@ dashboard:
 
 ### 阶段 H 可优化点（可选）
 
-- **Ingestion 管理页阶段级进度**：
+- **Ingestion 管理页阶段级进度**：✅ 已完成（见进度表 H可优化）
   - **背景**：大文档（如 16MB）摄取时，transform/embed 阶段耗时长，当前仅展示「摄取中…」spinner，用户无法感知当前阶段与进度，易误判为卡死。
   - **优化**：在 Ingestion 管理页调用 `IngestionPipeline.run(on_progress=...)` 时，利用已有回调驱动阶段级进度展示（如 `st.progress` 按 load/split/transform/embed/upsert 分步更新，或文案显示「当前：transform 3/20」）。
   - **修改文件**：`src/observability/dashboard/pages/ingestion_manager.py`
   - **验收**：摄取过程中可看到当前阶段或进度变化，大文档等待体验可预期。
+  - **实现**：已实现 `st.progress` 五阶段分步更新（load/split/transform/embed/upsert）+ `st.empty()` 文案「当前：{stage} {current}/{total}」。
 
 ---
 

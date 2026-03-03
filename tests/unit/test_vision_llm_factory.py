@@ -19,6 +19,7 @@ from core.settings import (
     VisionLlmSettings,
 )
 from libs.llm.base_vision_llm import BaseVisionLLM, ChatResponse
+from libs.llm.deepseek_vision_llm import DeepSeekVisionLLM
 from libs.llm.llm_factory import (
     LLMFactory,
     create_vision_llm,
@@ -71,6 +72,20 @@ def test_create_vision_llm_unknown_provider_raises() -> None:
     with pytest.raises(ValueError) as exc_info:
         create_vision_llm(settings)
     assert "unknown_vision" in str(exc_info.value)
+
+
+def test_create_vision_llm_deepseek_returns_deepseek_vision_llm() -> None:
+    """provider=deepseek 且配置 base_url/model 时，create_vision_llm 返回 DeepSeekVisionLLM。"""
+    settings = _make_settings(
+        vision_llm=VisionLlmSettings(
+            provider="deepseek",
+            api_key="sk-test",
+            base_url="https://api.deepseek.com",
+            model="deepseek-chat",
+        )
+    )
+    vision_llm = create_vision_llm(settings)
+    assert isinstance(vision_llm, DeepSeekVisionLLM)
 
 
 def test_factory_create_vision_llm_routes_to_fake() -> None:
