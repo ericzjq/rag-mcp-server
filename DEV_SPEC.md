@@ -2031,8 +2031,8 @@ dashboard:
 | ---- | -------------------- | --- | ---- | --- |
 | G1   | Dashboard 基础架构与系统总览页 | [x] | 2026-03-02 | 多页+总览; streamlit 依赖; ConfigService+ChromaStore.get_collection_stats; start_dashboard.py |
 | G2   | DocumentManager 实现   | [x] | 2026-03-02 | Chroma delete_by_metadata/get_ids; BM25 remove_document; FileIntegrity list_processed/remove_record; ImageStorage list_by_doc_hash/delete_by_doc_hash; test_document_manager |
-| G3   | 数据浏览器页面              | [ ] | -    |     |
-| G4   | Ingestion 管理页面       | [ ] | -    |     |
+| G3   | 数据浏览器页面              | [x] | 2026-03-03 | data_browser.py + DataService；文档列表/集合筛选/Chunk 详情/图片预览/返回列表 |
+| G4   | Ingestion 管理页面       | [x] | 2026-03-03 | 上传 PDF、集合选择、强制摄取、进度 spinner、文档列表删除 |
 | G5   | Ingestion 追踪页面       | [ ] | -    |     |
 | G6   | Query 追踪页面           | [ ] | -    |     |
 
@@ -2059,6 +2059,7 @@ dashboard:
 | I3   | 完善 README（运行说明 + MCP + Dashboard） | [ ] | -    |     |
 | I4   | 清理接口一致性（契约测试补齐）                   | [ ] | -    |     |
 | I5   | 全链路 E2E 验收                        | [ ] | -    |     |
+| I6   | 项目总结（INTERVIEW.md）                 | [x] | 2026-03-02 | 项目职责+主要工作三部分+JD 自检 |
 
 
 ---
@@ -2074,10 +2075,10 @@ dashboard:
 | 阶段 D   | 7      | 7     | 100%    |
 | 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 5     | 100%    |
-| 阶段 G   | 6      | 0     | 0%      |
+| 阶段 G   | 6      | 4     | 67%     |
 | 阶段 H   | 5      | 0     | 0%      |
-| 阶段 I   | 5      | 0     | 0%      |
-| **总计** | **68** | **52** | **76%** |
+| 阶段 I   | 6      | 1     | 17%     |
+| **总计** | **69** | **53** | **77%** |
 
 
 ---

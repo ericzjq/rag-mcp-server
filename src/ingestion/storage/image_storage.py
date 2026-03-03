@@ -107,6 +107,14 @@ class ImageStorage:
             ).fetchone()
         return row[0] if row else None
 
+    def list_collection_names(self) -> List[str]:
+        """返回所有已使用的 collection 名称（去重、排序），供 Dashboard 筛选。"""
+        with self._get_conn() as conn:
+            cursor = conn.execute(
+                "SELECT DISTINCT collection FROM image_index WHERE collection IS NOT NULL AND collection != '' ORDER BY collection"
+            )
+            return [row[0] for row in cursor.fetchall()]
+
     def list_by_collection(self, collection: str) -> List[Dict[str, Any]]:
         """按 collection 批量查询，返回含 image_id、file_path、doc_hash、page_num 等字段的字典列表。"""
         with self._get_conn() as conn:

@@ -17,6 +17,8 @@ os.chdir(_ROOT)
 import streamlit as st
 
 from observability.dashboard.pages.overview import run as overview_run
+from observability.dashboard.pages.data_browser import run as data_browser_run
+from observability.dashboard.pages.ingestion_manager import run as ingestion_manager_run
 
 
 def _placeholder(title: str):
@@ -29,8 +31,8 @@ def _placeholder(title: str):
 def main() -> None:
     pages = [
         st.Page(overview_run, title="系统总览", default=True),
-        st.Page(_placeholder("数据浏览器"), title="数据浏览器"),
-        st.Page(_placeholder("Ingestion 管理"), title="Ingestion 管理"),
+        st.Page(data_browser_run, title="数据浏览器"),
+        st.Page(ingestion_manager_run, title="Ingestion 管理"),
         st.Page(_placeholder("Ingestion 追踪"), title="Ingestion 追踪"),
         st.Page(_placeholder("Query 追踪"), title="Query 追踪"),
         st.Page(_placeholder("评估"), title="评估"),
