@@ -88,6 +88,21 @@ def test_create_vision_llm_deepseek_returns_deepseek_vision_llm() -> None:
     assert isinstance(vision_llm, DeepSeekVisionLLM)
 
 
+def test_create_vision_llm_qwen_returns_qwen_vision_llm() -> None:
+    """provider=qwen 且配置 base_url/model 时，create_vision_llm 返回 QwenVisionLLM。"""
+    from libs.llm.qwen_vision_llm import QwenVisionLLM
+    settings = _make_settings(
+        vision_llm=VisionLlmSettings(
+            provider="qwen",
+            api_key="sk-dashscope",
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            model="qwen-vl-max",
+        )
+    )
+    vision_llm = create_vision_llm(settings)
+    assert isinstance(vision_llm, QwenVisionLLM)
+
+
 def test_factory_create_vision_llm_routes_to_fake() -> None:
     """注册 Fake 后，create_vision_llm(settings with provider=fake) 返回 FakeVisionLLM。"""
     register_vision_llm_provider("fake", FakeVisionLLM)
