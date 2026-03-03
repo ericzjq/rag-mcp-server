@@ -9,10 +9,21 @@ from core.settings import Settings
 from libs.evaluator.base_evaluator import BaseEvaluator
 from libs.evaluator.custom_evaluator import CustomEvaluator
 
-# Provider 名称 -> 实现类（H1 补齐 ragas 等）
+# Provider 名称 -> 实现类（H1 补齐 ragas）
 _PROVIDERS: Dict[str, Type[BaseEvaluator]] = {
     "custom": CustomEvaluator,
 }
+
+
+def _register_ragas() -> None:
+    """延迟注册 ragas，避免未安装时顶层导入失败。"""
+    if "ragas" in _PROVIDERS:
+        return
+    try:
+        from observability.evaluation.ragas_evaluator import RagasEvaluator
+        _PROVIDERS["ragas"] = RagasEvaluator
+    except ImportError:
+        pass
 
 
 def register_evaluator_provider(name: str, impl: Type[BaseEvaluator]) -> None:
@@ -33,6 +44,7 @@ def create(settings: Settings) -> BaseEvaluator:
     Raises:
         ValueError: 未知或未实现的 provider 时，错误信息包含 provider 名称。
     """
+    _register_ragas()
     provider = settings.evaluation.provider.strip().lower()
     if provider not in _PROVIDERS or _PROVIDERS[provider] is None:
         raise ValueError(f"Unknown or unimplemented Evaluator provider: {provider}")
