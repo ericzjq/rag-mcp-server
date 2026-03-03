@@ -1,5 +1,5 @@
 """
-E2E：Dashboard 冒烟测试（I2）。使用 Streamlit AppTest 验证 6 个页面均可加载、不抛异常。
+E2E：Dashboard 冒烟测试（I2）。使用 Streamlit AppTest 验证各页面均可加载、不抛异常。
 因 AppTest.from_function 不会注入 streamlit，改用 from_string 注入含 import streamlit 的完整脚本。
 """
 
@@ -81,6 +81,18 @@ def test_dashboard_ingestion_traces_page_loads(tmp_path: Path) -> None:
 def test_dashboard_query_traces_page_loads(tmp_path: Path) -> None:
     """Query 追踪页可加载、不抛异常。"""
     _run_page_smoke(tmp_path, "observability.dashboard.pages.query_traces", "Query 追踪")
+
+
+@pytest.mark.e2e
+def test_dashboard_online_search_page_loads(tmp_path: Path) -> None:
+    """在线检索页可加载、不抛异常。"""
+    _run_page_smoke(tmp_path, "observability.dashboard.pages.online_search", "在线检索")
+
+
+@pytest.mark.e2e
+def test_dashboard_ragas_results_page_loads(tmp_path: Path) -> None:
+    """RAGAS 评估结果页可加载、不抛异常。"""
+    _run_page_smoke(tmp_path, "observability.dashboard.pages.ragas_results", "RAGAS 评估结果")
 
 
 @pytest.mark.e2e

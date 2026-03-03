@@ -94,8 +94,10 @@ def run(config_path: str = None, work_dir: str = None) -> None:
         traces = [t for t in traces if _trace_matches_keyword(t, keyword)]
 
     if not traces:
-        st.info("暂无 Query 追踪记录。请先通过 MCP 或脚本执行 query 并确保 Query 链路写入 trace 后再查看。")
+        st.info("暂无 Query 追踪记录。请先通过 MCP 或脚本执行 query（会写入 trace）后再查看。")
         return
+
+    st.caption("RAGAS（faithfulness / answer_relevancy / context_precision）来自离线评估脚本，本页仅展示检索阶段耗时。")
 
     st.caption("共 %d 条查询记录（按时间倒序）" % len(traces))
     for t in traces:

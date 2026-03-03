@@ -16,8 +16,10 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 from core.settings import load_settings
+from core.trace.trace_context import TraceContext
 from ingestion.pipeline import IngestionPipeline
 from libs.loader.file_integrity import SQLiteIntegrityChecker
+from observability.logger import write_trace
 
 
 def main() -> int:
@@ -65,15 +67,26 @@ def main() -> int:
         logger.error("文档不存在: %s", path)
         return 1
 
+    traces_path = getattr(settings.observability, "traces_path", "logs/traces.jsonl")
+    if not os.path.isabs(traces_path):
+        traces_path = os.path.join(work_dir, traces_path)
+    trace = TraceContext(trace_type="ingestion")
     try:
         result = pipeline.run(
             path,
             collection=args.collection or "",
             force=args.force,
+            trace=trace,
         )
     except Exception as e:
         logger.exception("摄取失败: %s", e)
         return 1
+
+    if not result.get("skipped"):
+        try:
+            write_trace(trace.to_dict(), path=traces_path)
+        except Exception as e:
+            logger.warning("写入 ingestion trace 失败: %s", e)
 
     if result.get("skipped"):
         logger.info("已跳过（此前已成功摄取）: %s", path)

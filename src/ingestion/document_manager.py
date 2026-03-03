@@ -164,8 +164,12 @@ class DocumentManager:
 
         images_deleted = self._images.delete_by_doc_hash(doc_id)
 
-        file_hash = self._integrity.compute_sha256(source_path)
-        integrity_removed = getattr(self._integrity, "remove_record", lambda _: False)(file_hash)
+        try:
+            file_hash = self._integrity.compute_sha256(source_path)
+            integrity_removed = getattr(self._integrity, "remove_record", lambda _: False)(file_hash)
+        except FileNotFoundError:
+            # 文件已不存在（如 Dashboard 上传的临时文件已被清理），按 path 从 integrity 表移除
+            integrity_removed = getattr(self._integrity, "remove_record_by_path", lambda _: False)(source_path)
 
         return DeleteResult(
             source_path=source_path,

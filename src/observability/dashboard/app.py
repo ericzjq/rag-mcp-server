@@ -21,6 +21,8 @@ from observability.dashboard.pages.data_browser import run as data_browser_run
 from observability.dashboard.pages.ingestion_manager import run as ingestion_manager_run
 from observability.dashboard.pages.ingestion_traces import run as ingestion_traces_run
 from observability.dashboard.pages.query_traces import run as query_traces_run
+from observability.dashboard.pages.online_search import run as online_search_run
+from observability.dashboard.pages.ragas_results import run as ragas_results_run
 from observability.dashboard.pages.evaluation_panel import run as evaluation_panel_run
 
 
@@ -38,6 +40,8 @@ def main() -> None:
         st.Page(ingestion_manager_run, title="Ingestion 管理", url_path="ingestion-manager"),
         st.Page(ingestion_traces_run, title="Ingestion 追踪", url_path="ingestion-traces"),
         st.Page(query_traces_run, title="Query 追踪", url_path="query-traces"),
+        st.Page(online_search_run, title="在线检索", url_path="online-search"),
+        st.Page(ragas_results_run, title="RAGAS 评估结果", url_path="ragas-results"),
         st.Page(evaluation_panel_run, title="评估", url_path="evaluation"),
     ]
     pg = st.navigation(pages)

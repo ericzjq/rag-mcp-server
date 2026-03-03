@@ -6,10 +6,12 @@ import os
 from typing import Any, Dict, Optional
 
 from core.settings import load_settings
+from core.trace.trace_context import TraceContext
 from core.query_engine.hybrid_search import HybridSearch
 from core.query_engine.reranker import Reranker
 from core.response.response_builder import build as build_response
 from core.response.multimodal_assembler import assemble as assemble_images
+from observability.logger import write_trace
 
 
 def query_knowledge_hub(
@@ -23,6 +25,7 @@ def query_knowledge_hub(
     """
     Tool 入口：执行 HybridSearch + Reranker，构建带引用的 MCP 响应。
     config_path / work_dir 用于测试或覆盖默认；默认从 MCP_CONFIG_PATH 与 cwd 读取。
+    会写入 query trace 到 observability.traces_path，供 Dashboard Query 追踪页展示。
     """
     base = work_dir or os.getcwd()
     path = config_path or os.environ.get("MCP_CONFIG_PATH", "config/settings.yaml")
@@ -39,9 +42,18 @@ def query_knowledge_hub(
     if collection:
         filters = {"collection": collection}
 
-    results = hybrid.search(query, top_k=top_k, filters=filters)
+    trace = TraceContext(trace_type="query")
+    results = hybrid.search(query, top_k=top_k, filters=filters, trace=trace)
     if results:
-        results = reranker.rerank(query, results)
+        results = reranker.rerank(query, results, trace=trace)
+    trace.finish()
+    traces_path = getattr(settings.observability, "traces_path", "logs/traces.jsonl")
+    traces_full = traces_path if os.path.isabs(traces_path) else os.path.join(base, traces_path)
+    try:
+        write_trace(trace.to_dict(), path=traces_full)
+    except Exception:
+        pass
+
     response = build_response(results, query)
     image_items = assemble_images(results, work_dir=base)
     if image_items:

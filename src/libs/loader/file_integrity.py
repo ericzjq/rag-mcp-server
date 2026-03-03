@@ -40,6 +40,10 @@ class FileIntegrityChecker(ABC):
         """移除指定 file_hash 的摄取记录；若不存在返回 False。默认实现可被子类覆盖。"""
         return False
 
+    def remove_record_by_path(self, file_path: str) -> bool:
+        """按 file_path 移除摄取记录（用于文件已删除的场景，如 Dashboard 上传的临时文件）。默认返回 False。"""
+        return False
+
 
 def _sha256_of_file(path: str) -> str:
     """计算文件 SHA256（十六进制）。"""
@@ -122,5 +126,12 @@ class SQLiteIntegrityChecker(FileIntegrityChecker):
         """移除指定 file_hash 的摄取记录；若不存在返回 False。"""
         with self._get_conn() as conn:
             cur = conn.execute("DELETE FROM ingestion_history WHERE file_hash = ?", (file_hash,))
+            conn.commit()
+            return cur.rowcount > 0
+
+    def remove_record_by_path(self, file_path: str) -> bool:
+        """按 file_path 移除摄取记录（文件已不存在时使用，如 Dashboard 上传后已删除的临时文件）。"""
+        with self._get_conn() as conn:
+            cur = conn.execute("DELETE FROM ingestion_history WHERE file_path = ?", (file_path,))
             conn.commit()
             return cur.rowcount > 0

@@ -9,7 +9,7 @@ from core.query_engine.hybrid_search import HybridSearch
 from libs.evaluator.evaluator_factory import create as create_evaluator
 
 from observability.dashboard.services.config_service import ConfigService
-from observability.evaluation.eval_runner import EvalRunner
+from observability.evaluation.eval_runner import EvalRunner, save_report
 
 DEFAULT_GOLDEN_PATH = "tests/fixtures/golden_test_set.json"
 
@@ -48,6 +48,12 @@ def run(config_path: str = None, work_dir: str = None) -> None:
                 with st.spinner("评估中…"):
                     report = runner.run(path, top_k=top_k)
                 st.success("评估完成")
+                latest_path = os.path.join(wd, "logs", "eval_report_latest.json")
+                try:
+                    save_report(report, latest_path)
+                    st.caption("报告已保存至 %s，可在「RAGAS 评估结果」页查看。" % latest_path)
+                except Exception:
+                    pass
                 col1, col2 = st.columns(2)
                 with col1:
                     st.metric("Hit Rate", "%.4f" % report.hit_rate)

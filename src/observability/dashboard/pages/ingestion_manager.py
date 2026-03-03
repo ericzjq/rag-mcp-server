@@ -7,8 +7,10 @@ import tempfile
 import traceback
 import streamlit as st
 
+from core.trace.trace_context import TraceContext
 from ingestion.pipeline import IngestionPipeline
 from libs.loader.file_integrity import SQLiteIntegrityChecker
+from observability.logger import write_trace
 
 from observability.dashboard.services.config_service import ConfigService
 from observability.dashboard.services.data_service import DataService
@@ -86,12 +88,21 @@ def run(config_path: str = None, work_dir: str = None) -> None:
                     image_storage=image_storage,
                     bm25_index_dir=bm25_dir,
                 )
+                trace = TraceContext(trace_type="ingestion")
                 result = pipeline.run(
                     tmp_path,
                     collection=collection_name or "",
                     force=force,
                     on_progress=on_progress,
+                    trace=trace,
                 )
+                if not result.get("skipped"):
+                    traces_path = getattr(settings.observability, "traces_path", "logs/traces.jsonl")
+                    traces_full = traces_path if os.path.isabs(traces_path) else os.path.join(wd, traces_path)
+                    try:
+                        write_trace(trace.to_dict(), path=traces_full)
+                    except Exception:
+                        pass
                 if result.get("skipped"):
                     st.info("已跳过：该文件此前已成功摄取，未做变更。")
                 else:

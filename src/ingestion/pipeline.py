@@ -9,7 +9,7 @@ from typing import Any, Callable, List, Optional
 
 from core.settings import Settings
 from core.trace.trace_context import TraceContext
-from core.types import Chunk, Document
+from core.types import Chunk, ChunkRecord, Document
 
 from ingestion.chunking.document_chunker import DocumentChunker
 from ingestion.embedding.batch_processor import BatchProcessor
@@ -177,9 +177,14 @@ class IngestionPipeline:
         # 7. Store (upsert)
         logger.info("写入向量与 BM25 索引")
         t4 = time.perf_counter()
-        self._vector_upserter.upsert(records, trace=trace)
+        stored_ids = self._vector_upserter.upsert(records, trace=trace)
+        # BM25 必须使用与 Chroma 相同的 chunk_id，否则 Dense/Sparse 融合时同一 chunk 会以两种 id 各出现一次导致重复
+        records_for_bm25 = [
+            ChunkRecord(id=stored_ids[i], text=r.text, metadata=r.metadata, dense_vector=r.dense_vector, sparse_vector=r.sparse_vector)
+            for i, r in enumerate(records)
+        ]
         indexer = BM25Indexer(index_dir=self._bm25_index_dir)
-        indexer.build(records).save()
+        indexer.build(records_for_bm25).save()
         trace.record_stage("upsert", {
             "method": getattr(self._settings.vector_store, "provider", "chroma") + ",bm25",
             "elapsed_ms": round((time.perf_counter() - t4) * 1000, 2),

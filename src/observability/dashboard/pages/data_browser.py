@@ -46,7 +46,9 @@ def run(config_path: str = None, work_dir: str = None) -> None:
                 else:
                     st.subheader("Chunks")
                     for i, ch in enumerate(detail.chunks):
-                        with st.expander("Chunk %s" % ch.get("id", i)):
+                        cid = ch.get("id", "")
+                        with st.expander("Chunk %s" % (cid or i)):
+                            st.caption("chunk_id（用于 golden test set 的 expected_chunk_ids）：%s" % (cid or "-"))
                             st.text_area("内容", value=ch.get("text", ""), height=120, disabled=True, key="chunk_%s_%s" % (info.doc_id, i))
                             meta = ch.get("metadata") or {}
                             if meta:

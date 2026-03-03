@@ -65,6 +65,7 @@ class HybridSearch:
         processed = self._qp.process(query.strip())
         if trace is not None:
             trace.record_stage("query_processing", {
+                "query": query.strip(),
                 "method": "query_processor",
                 "elapsed_ms": round((time.perf_counter() - t0) * 1000, 2),
             })

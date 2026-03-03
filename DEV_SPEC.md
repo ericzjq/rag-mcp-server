@@ -2037,6 +2037,8 @@ dashboard:
 | G4   | Ingestion 管理页面       | [x] | 2026-03-03 | 上传 PDF、集合选择、强制摄取、进度 spinner、文档列表删除 |
 | G5   | Ingestion 追踪页面       | [x] | 2026-03-03 | TraceService + ingestion_traces.py；历史列表按时间倒序、阶段耗时条形图 |
 | G6   | Query 追踪页面           | [x] | 2026-03-03 | query_traces.py；历史列表+关键词筛选、耗时条形图、Dense vs Sparse、Rerank |
+| G7   | 在线检索页面             | [x] | 2026-03-03 | online_search.py；query 输入、HybridSearch+Reranker、Top-K 召回结果展示 |
+| G8   | RAGAS 评估结果页面       | [x] | 2026-03-03 | ragas_results.py + save_report/load_report；加载报告、展示 hit_rate/mrr 与 per-query RAGAS |
 
 
 #### 阶段 H：评估体系
@@ -2078,7 +2080,7 @@ dashboard:
 | 阶段 D   | 7      | 7     | 100%    |
 | 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 5     | 100%    |
-| 阶段 G   | 6      | 6     | 100%    |
+| 阶段 G   | 8      | 8     | 100%    |
 | 阶段 H   | 6      | 6     | 100%    |
 | 阶段 I   | 6      | 6     | 100%    |
 | **总计** | **71** | **67** | **94%** |
@@ -3133,6 +3135,35 @@ dashboard:
   - 详情页：耗时瀑布图 + Dense vs Sparse 并列对比 + Rerank 前后排名变化
 - **验收标准**：执行 query 后，Dashboard 显示查询追踪详情与各阶段对比。
 - **测试方法**：手动验证（先 query → 打开 Dashboard → 查看追踪）。
+
+### G7：在线检索页面（开发小结）
+
+- **目标**：Dashboard 支持在线检索——用户可直接在页面输入 query 发起检索，并展示召回结果（Top-K chunks、分数、可展开的 chunk 详情）。
+- **前置依赖**：D5（HybridSearch）、G1（Dashboard 架构）、ConfigService
+- **修改文件**：
+  - `src/observability/dashboard/pages/online_search.py`（新增）
+  - `src/observability/dashboard/app.py`（注册「在线检索」页）
+- **实现要点**：
+  - 输入：query 文本框、top_k、可选 collection 限定
+  - 检索：调用 HybridSearch.search + Reranker.rerank（与 MCP query_knowledge_hub 同链路），不写 trace（可选）
+  - 展示：成功召回条数；每条以 expander 展示 chunk_id、score、metadata、正文（长文可折叠）
+- **验收标准**：在 Dashboard 输入 query 点击检索后，能展示召回列表与每条详情。
+- **测试方法**：手动验证；E2E 冒烟 `test_dashboard_online_search_page_loads`。
+
+### G8：RAGAS 评估结果页面（开发小结）
+
+- **目标**：Dashboard 支持专门展示某次评估的 RAGAS 结果——用户选择或输入评估报告文件路径，加载后展示该次的 hit_rate、mrr 及 per-query 的 RAGAS 指标（faithfulness、answer_relevancy、context_precision 等）。
+- **前置依赖**：H3（EvalRunner、EvalReport）、H4（评估面板）、G1（Dashboard 架构）
+- **修改文件**：
+  - `src/observability/evaluation/eval_runner.py`（新增 `save_report` / `load_report`，报告 JSON 持久化）
+  - `src/observability/dashboard/pages/evaluation_panel.py`（运行评估后自动保存至 `logs/eval_report_latest.json`）
+  - `src/observability/dashboard/pages/ragas_results.py`（新增：路径输入、加载报告、汇总指标 + 各 query 的 RAGAS 明细）
+  - `src/observability/dashboard/app.py`（注册「RAGAS 评估结果」页）
+- **实现要点**：
+  - 报告格式：JSON，含 `hit_rate`、`mrr`、`query_results`（每项含 `query`、`metrics` 等）；由 EvalRunner 产出、save_report 写入。
+  - RAGAS 页：默认路径 `logs/eval_report_latest.json`；加载后展示汇总 hit_rate/mrr，再按 query 展开展示 metrics 中的数值型指标（含 RAGAS 各维）。
+- **验收标准**：在「评估」页运行评估后，在「RAGAS 评估结果」页加载报告可看到 hit_rate、mrr 及各 query 的 RAGAS 指标。
+- **测试方法**：手动验证；E2E 冒烟 `test_dashboard_ragas_results_page_loads`。
 
 ---
 

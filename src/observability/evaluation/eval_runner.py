@@ -108,3 +108,30 @@ class EvalRunner:
         hit_rate = sum(hit_rates) / n if n else 0.0
         mrr = sum(mrrs) / n if n else 0.0
         return EvalReport(hit_rate=hit_rate, mrr=mrr, query_results=query_results)
+
+
+def save_report(report: EvalReport, path: str) -> None:
+    """将 EvalReport 序列化为 JSON 写入文件，供 Dashboard RAGAS 结果页等加载。"""
+    path_obj = Path(path)
+    path_obj.parent.mkdir(parents=True, exist_ok=True)
+    with open(path_obj, "w", encoding="utf-8") as f:
+        json.dump(
+            {"hit_rate": report.hit_rate, "mrr": report.mrr, "query_results": report.query_results},
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+def load_report(path: str) -> EvalReport:
+    """从 JSON 文件加载 EvalReport。"""
+    path_obj = Path(path)
+    if not path_obj.is_file():
+        raise FileNotFoundError("评估报告文件不存在: %s" % path)
+    with open(path_obj, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return EvalReport(
+        hit_rate=float(data.get("hit_rate", 0)),
+        mrr=float(data.get("mrr", 0)),
+        query_results=list(data.get("query_results") or []),
+    )
