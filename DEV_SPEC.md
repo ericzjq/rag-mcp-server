@@ -1959,6 +1959,7 @@ dashboard:
 | B7.6 | ChromaStore 默认实现            | [x] | 2025-03-01 | chroma_store.py、持久化、upsert/query、roundtrip 集成测试              |
 | B7.7 | LLM Reranker 实现             | [x] | 2025-03-01 | rerank.txt、prompt 注入、ranked ids、回退                    |
 | B7.8 | Cross-Encoder Reranker 实现   | [x] | 2025-03-01 | mock scorer、超时/失败回退、长度不一致回退                  |
+| B7.9 | Qwen Embedding 实现          | [x] | 2026-03-03 | qwen_embedding.py、DashScope OpenAI 兼容、text-embedding-v3、工厂注册、mock 测试 |
 | B8   | Vision LLM 抽象接口与工厂集成        | [x] | 2025-03-01 | BaseVisionLLM、ChatResponse、create_vision_llm、Fake 测试   |
 | B9   | Azure Vision LLM 实现         | [x] | 2025-03-01 | AzureVisionLLM、路径/base64、max_image_size、mock 测试        |
 | B9.1 | DeepSeek Vision LLM 实现      | [x] | 2026-03-03 | VisionLlmSettings 扩展 base_url/model；deepseek_vision_llm.py；工厂注册 provider=deepseek；图转文配置示例 |
@@ -2331,6 +2332,25 @@ dashboard:
   - backend=cross_encoder 时 `RerankerFactory` 可创建。
   - 提供超时/失败回退信号（供 Core 层 `D6` fallback 使用）。
 - **测试方法**：`pytest -q tests/unit/test_cross_encoder_reranker.py`。
+
+### B7.9：Qwen Embedding 实现
+
+- **目标**：补齐 `qwen_embedding.py`，通过阿里云百炼（DashScope）OpenAI 兼容接口调用文本向量模型（如 `text-embedding-v3`），实现 `embed(texts)` 批量向量化；与 vision_llm 的 qwen 配置风格一致，可共用 DashScope API Key。
+- **修改文件**：
+  - `src/libs/embedding/qwen_embedding.py`
+  - `src/libs/embedding/embedding_factory.py`（注册 `provider: qwen`）
+  - `config/settings.yaml.example`（增加 Qwen embedding 示例）
+  - `tests/unit/test_qwen_embedding.py`（mock HTTP 测试）
+- **实现要点**：
+  - 默认 `base_url`：`https://dashscope.aliyuncs.com/compatible-mode/v1`（与 DashScope 文档及 qwen_vision_llm 一致）。
+  - 默认 `model`：`text-embedding-v3`（可在配置中改为 text-embedding-v4 等）。
+  - 使用 OpenAI SDK 的 `embeddings.create(model=..., input=texts)`，与现有 OpenAI Embedding 调用方式一致。
+  - 空输入抛出 ValueError，异常信息包含 provider 名称；不泄露 api_key。
+- **验收标准**：
+  - provider=qwen 时 `EmbeddingFactory` 可创建。
+  - 支持配置 `api_key`、`base_url`（可选）、`model`（可选，默认 text-embedding-v3）。
+  - mock 测试覆盖：工厂路由、默认 base_url/model、正常响应返回向量、异常可读且脱敏。
+- **测试方法**：`pytest -q tests/unit/test_qwen_embedding.py`。
 
 ### B8：Vision LLM 抽象接口与工厂集成
 

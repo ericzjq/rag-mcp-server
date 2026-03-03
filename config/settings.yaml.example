@@ -10,6 +10,12 @@ llm:
 embedding:
   provider: openai
   model: text-embedding-3-small
+# 使用 Qwen（阿里云百炼 DashScope）文本向量，可与 vision_llm 共用同一 API Key：
+# embedding:
+#   provider: qwen
+#   model: text-embedding-v3      # 或 text-embedding-v4
+#   api_key: ""                  # DashScope API Key
+#   base_url: https://dashscope.aliyuncs.com/compatible-mode/v1   # 可选，不填则用默认
 
 vector_store:
   provider: chroma
@@ -32,13 +38,20 @@ evaluation:
 
 # Vision LLM（可选）：Transform 阶段 ImageCaptioner 用其做 PDF 图转文（语意识别）。
 # 未配置时，含图片的 chunk 不会调多模态接口，仅标记 has_unprocessed_images。
-# 支持 provider: azure（Azure OpenAI）或 deepseek（DeepSeek 视觉模型，OpenAI 兼容接口）。
-# 使用 DeepSeek 示例（与主 LLM 共用 api_key/base_url 即可）：
+# 支持 provider: qwen（Qwen-VL-Max / DashScope）、azure、deepseek。
+# 使用 Qwen-VL-Max（推荐，DashScope OpenAI 兼容模式）：
+# vision_llm:
+#   provider: qwen
+#   api_key: ""                    # 阿里云百炼 / DashScope API Key
+#   base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+#   model: qwen-vl-max             # 或 qwen-vl-max-latest
+#   max_image_size: 2048
+# 使用 DeepSeek 示例：
 # vision_llm:
 #   provider: deepseek
-#   api_key: ""                    # 同 llm，或单独申请
+#   api_key: ""
 #   base_url: https://api.deepseek.com
-#   model: deepseek-chat            # 若 DeepSeek 提供视觉模型，改为对应 model 名
+#   model: deepseek-chat
 #   max_image_size: 2048
 # 使用 Azure 示例：
 # vision_llm:

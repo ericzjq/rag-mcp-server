@@ -10,12 +10,14 @@ from libs.embedding.base_embedding import BaseEmbedding
 from libs.embedding.openai_embedding import OpenAIEmbedding
 from libs.embedding.azure_embedding import AzureEmbedding
 from libs.embedding.ollama_embedding import OllamaEmbedding
+from libs.embedding.qwen_embedding import QwenEmbedding
 
-# Provider 名称 -> 实现类（B7.3 openai/azure，B7.4 ollama，测试中可注册 Fake）
+# Provider 名称 -> 实现类（B7.3 openai/azure，B7.4 ollama，B7.9 qwen，测试中可注册 Fake）
 _PROVIDERS: Dict[str, Type[BaseEmbedding]] = {
     "openai": OpenAIEmbedding,
     "azure": AzureEmbedding,
     "ollama": OllamaEmbedding,
+    "qwen": QwenEmbedding,
 }
 
 
