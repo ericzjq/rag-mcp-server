@@ -2044,7 +2044,7 @@ dashboard:
 | ---- | ---------------------------- | --- | ---- | --- |
 | H1   | RagasEvaluator 实现            | [x] | 2026-03-03 | ragas_evaluator.py + 工厂注册；Faithfulness/AnswerRelevancy/ContextPrecision；未安装时 ImportError |
 | H2   | CompositeEvaluator 实现        | [x] | 2026-03-03 | composite_evaluator.py；并行执行、按类名前缀合并 metrics；空列表 ValueError |
-| H3   | EvalRunner + Golden Test Set | [ ] | -    |     |
+| H3   | EvalRunner + Golden Test Set | [x] | 2026-03-03 | eval_runner.py + EvalReport；golden_test_set.json；scripts/evaluate.py；test_eval_runner |
 | H4   | 评估面板页面                       | [ ] | -    |     |
 | H5   | Recall 回归测试（E2E）             | [ ] | -    |     |
 
@@ -2076,9 +2076,9 @@ dashboard:
 | 阶段 E   | 6      | 6     | 100%    |
 | 阶段 F   | 5      | 5     | 100%    |
 | 阶段 G   | 6      | 6     | 100%    |
-| 阶段 H   | 5      | 2     | 40%     |
+| 阶段 H   | 5      | 3     | 60%     |
 | 阶段 I   | 6      | 1     | 17%     |
-| **总计** | **69** | **57** | **82%** |
+| **总计** | **69** | **58** | **84%** |
 
 
 ---
