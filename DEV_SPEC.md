@@ -2747,6 +2747,28 @@ dashboard:
 - **验收标准**：命令行可运行并在 `data/db` 产生产物；重复运行在未变更时跳过。
 - **测试方法**：`pytest -q tests/e2e/test_data_ingestion.py`（尽量用临时目录）。
 
+### C16：BM25 多文档与增量更新
+
+- **目标**：BM25 支持多文档（单 index 覆盖所有已摄取文档的 chunk，与 Chroma 一致）与增量更新（每次摄取不全量重写索引：先删同文件旧 chunk，再合并当前文档新 chunk，减少耗时与写盘）。
+- **前置依赖**：C11（BM25Indexer）、C12（VectorUpserter）、C14（Pipeline）、G2（DocumentManager）
+- **修改文件**：
+  - `src/ingestion/storage/vector_upserter.py`（upsert 返回 `(stored_ids, deleted_ids)`，删除前用 get_ids_by_metadata 收集将被删的 id）
+  - `src/ingestion/storage/bm25_indexer.py`（新增 `merge(records)`；`remove_document` 仅改内存、不再内部 save）
+  - `src/ingestion/pipeline.py`（Store 阶段：load → remove_document(deleted_ids) → merge(records_for_bm25) → save）
+  - `src/ingestion/document_manager.py`（delete_document 中 remove_document 后显式 `bm25.save()`）
+  - 所有调用 `VectorUpserter.upsert` 的调用方（适配返回值元组）
+- **实现要点**：
+  - **多文档形态**：单全局 `data/db/bm25/index.json` 包含所有已摄取文档的 chunk（不采用多份 index 文件）。
+  - **VectorUpserter**：在 `delete_by_metadata` 前对 file_hash、source_path 分别 `get_ids_by_metadata`，合并去重得 `deleted_ids`；返回 `Tuple[List[str], List[str]]`；若 store 无 `get_ids_by_metadata` 则 `deleted_ids` 为空。
+  - **BM25Indexer.merge(records)**：在当前内存索引上合并 records（新 term 新增 postings，已有 term 追加）；重算 N、avgdl 及所有 term 的 IDF；不负责 load/save。
+  - **BM25Indexer.remove_document(chunk_ids)**：仅从内存 postings 中移除并重算 N、avgdl，不调用 save()；由调用方统一 save()。
+  - **SparseRetriever**：可选在 retrieve 时按 index 文件 mtime 决定是否重新 load，以在未重启进程时读到最新索引。
+- **验收标准**：
+  - 先摄取文档 A、再摄取文档 B 后，BM25 索引中同时包含 A、B 的 chunk；Sparse 与 Dense 能召回同一文档集合。
+  - 同一文档再次摄取时，BM25 先删该文件旧 chunk 再合并新 chunk，索引与 Chroma 一致，且只写一次 index.json。
+  - DocumentManager 删除某文档后，BM25 中对应 chunk 被移除且结果持久化。
+- **测试方法**：单元测试（merge/remove_document 不 save）；集成测试（多文档摄取后 BM25 含多文档、同文件重摄取后增量更新、删除后持久化）；可复用或扩展 `tests/unit/test_bm25_indexer_roundtrip.py` 与 ingestion 相关用例。
+
 ---
 
 ## 阶段 D：Retrieval MVP（目标：能 query 并返回 Top-K chunks）

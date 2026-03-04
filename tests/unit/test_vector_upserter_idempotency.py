@@ -56,8 +56,8 @@ def test_same_chunk_twice_upsert_same_id() -> None:
     store = _MockVectorStore()
     upserter = VectorUpserter(store)
     rec = _record("c1", "hello world", [0.1, 0.2], {"source_path": "a.pdf", "chunk_index": 0})
-    ids1 = upserter.upsert([rec], trace=None)
-    ids2 = upserter.upsert([rec], trace=None)
+    ids1, _ = upserter.upsert([rec], trace=None)
+    ids2, _ = upserter.upsert([rec], trace=None)
     assert len(ids1) == 1 and len(ids2) == 1
     assert ids1[0] == ids2[0]
     assert ids1[0] == compute_stable_id(rec)
@@ -81,7 +81,7 @@ def test_batch_upsert_preserves_order() -> None:
         _record("b", "second", [2.0], {"source_path": "p", "chunk_index": 1}),
         _record("c", "third", [3.0], {"source_path": "p", "chunk_index": 2}),
     ]
-    ids = upserter.upsert(records, trace=None)
+    ids, _ = upserter.upsert(records, trace=None)
     assert len(ids) == 3
     assert ids[0] == compute_stable_id(records[0])
     assert ids[1] == compute_stable_id(records[1])
@@ -95,7 +95,7 @@ def test_empty_records_returns_empty_ids() -> None:
     """空 records 返回空 id 列表。"""
     store = _MockVectorStore()
     upserter = VectorUpserter(store)
-    assert upserter.upsert([], trace=None) == []
+    assert upserter.upsert([], trace=None) == ([], [])
     assert store.upserted == []
 
 

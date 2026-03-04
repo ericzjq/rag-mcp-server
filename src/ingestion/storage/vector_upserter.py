@@ -4,7 +4,7 @@ VectorUpserter（C12）：接收 DenseEncoder 的向量输出，生成稳定 chu
 
 import hashlib
 import logging
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -45,32 +45,37 @@ class VectorUpserter:
         self,
         records: List[ChunkRecord],
         trace: Optional[Any] = None,
-    ) -> List[str]:
+    ) -> Tuple[List[str], List[str]]:
         """
         为每条 record 生成稳定 id，调用 VectorStore.upsert；同一内容重复写入产生相同 id（幂等）。
+        C16：删除前先收集将被删的 id，返回 (stored_ids, deleted_ids) 供 BM25 增量更新使用。
 
         Args:
             records: 含 dense_vector 的 ChunkRecord 列表（顺序保持）。
             trace: 可选追踪上下文。
 
         Returns:
-            写入使用的 id 列表，与 records 顺序一致。
+            (写入使用的 id 列表与 records 顺序一致, 本轮删除的 chunk_id 列表，供 BM25 remove_document)。
         """
         if not records:
-            return []
-        # 按 file_hash / source_path 删除旧 chunk，保证同文件只保留一份（file_hash）、同 path 幂等（source_path）
+            return ([], [])
         first_meta = records[0].metadata or {}
         file_hash = first_meta.get("file_hash")
         source_path = first_meta.get("source_path")
-        if hasattr(self._store, "delete_by_metadata"):
+        deleted_ids: List[str] = []
+        if hasattr(self._store, "get_ids_by_metadata") and hasattr(self._store, "delete_by_metadata"):
+            deleted_set: set = set()
             if file_hash:
-                deleted = self._store.delete_by_metadata({"file_hash": file_hash})
-                if deleted:
-                    logger.info("按 file_hash 删除旧 chunk 数量: %d", deleted)
+                deleted_set.update(self._store.get_ids_by_metadata({"file_hash": file_hash}))
             if source_path:
-                deleted_path = self._store.delete_by_metadata({"source_path": source_path})
-                if deleted_path:
-                    logger.info("按 source_path 删除旧 chunk 数量: %d", deleted_path)
+                deleted_set.update(self._store.get_ids_by_metadata({"source_path": source_path}))
+            deleted_ids = list(deleted_set)
+            if deleted_ids:
+                logger.info("按 file_hash/source_path 将删除旧 chunk 数量: %d", len(deleted_ids))
+            if file_hash:
+                self._store.delete_by_metadata({"file_hash": file_hash})
+            if source_path:
+                self._store.delete_by_metadata({"source_path": source_path})
         store_records: List[VectorStoreRecord] = []
         ids: List[str] = []
         for r in records:
@@ -86,4 +91,4 @@ class VectorUpserter:
                 })
         if store_records:
             self._store.upsert(store_records, trace=trace)
-        return ids
+        return (ids, deleted_ids)

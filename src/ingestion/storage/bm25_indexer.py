@@ -76,6 +76,42 @@ class BM25Indexer:
             }
         return self
 
+    def merge(self, records: List[ChunkRecord]) -> "BM25Indexer":
+        """
+        C16：将当前文档的 records 合并进已有内存索引（新 term 新增 postings，已有 term 追加）；
+        重算 N、avgdl 及所有 term 的 IDF。不执行 load/save，由调用方在 load 后调用、最后 save。
+        """
+        if not records:
+            return self
+        # 当前索引可能为空（首次或 load 失败）
+        existing_doc_lengths: Dict[str, float] = {}
+        for info in self._terms.values():
+            for p in info["postings"]:
+                existing_doc_lengths[p["chunk_id"]] = p["doc_length"]
+        new_doc_lengths: List[float] = []
+        for r in records:
+            sv = r.sparse_vector or {}
+            dl = sum(sv.values())
+            new_doc_lengths.append(dl)
+            for term, tf in sv.items():
+                t = term.strip().lower()
+                if not t:
+                    continue
+                if t not in self._terms:
+                    self._terms[t] = {"idf": 0.0, "postings": []}
+                self._terms[t]["postings"].append({
+                    "chunk_id": r.id,
+                    "tf": float(tf),
+                    "doc_length": dl,
+                })
+        self._n = len(existing_doc_lengths) + len(records)
+        total_dl = sum(existing_doc_lengths.values()) + sum(new_doc_lengths)
+        self._avgdl = total_dl / self._n if self._n else 0.0
+        for term, info in self._terms.items():
+            df = len(info["postings"])
+            info["idf"] = _idf(self._n, df)
+        return self
+
     def save(self, index_path: Optional[str] = None) -> Path:
         """序列化索引到 index_path 或 self._index_dir / index.json；创建目录。"""
         path = Path(index_path) if index_path else (self._index_dir / "index.json")
@@ -148,7 +184,8 @@ class BM25Indexer:
 
     def remove_document(self, chunk_ids: List[str]) -> int:
         """
-        从索引中移除指定 chunk_id 的文档；更新 postings、N、avgdl 并持久化。
+        从索引中移除指定 chunk_id 的文档；仅更新内存中的 postings、N、avgdl 及 IDF。
+        C16：不再内部 save()，由调用方（Pipeline / DocumentManager）在完成后统一 save()。
         返回被移除的 chunk 数量（即 len(chunk_ids) 中实际在索引内的数量）。
         """
         if not chunk_ids:
@@ -173,5 +210,7 @@ class BM25Indexer:
                 doc_lengths[p["chunk_id"]] = p["doc_length"]
         self._n = len(doc_lengths)
         self._avgdl = sum(doc_lengths.values()) / self._n if self._n else 0.0
-        self.save()
+        # 重算所有 term 的 IDF
+        for term, info in self._terms.items():
+            info["idf"] = _idf(self._n, len(info["postings"]))
         return len(removed)

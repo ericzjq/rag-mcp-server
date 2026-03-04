@@ -161,6 +161,8 @@ class DocumentManager:
             except (FileNotFoundError, OSError):
                 pass
             bm25_removed = self._bm25.remove_document(chunk_ids)
+            if hasattr(self._bm25, "save"):
+                self._bm25.save()  # C16: remove_document 不再内部 save，由调用方持久化
 
         images_deleted = self._images.delete_by_doc_hash(doc_id)
 

@@ -86,3 +86,48 @@ def test_index_rebuild_overwrite() -> None:
         idx.load(str(path))
         top2 = idx.query(["b"], top_k=5)
         assert set(top2) == {"c1", "c2"}
+
+
+def test_merge_into_existing_index() -> None:
+    """C16: merge 将新 records 合并进已有索引，N/avgdl/IDF 正确。"""
+    r1 = [_record("c1", "a b", {"a": 1.0, "b": 1.0})]
+    r2 = [_record("c2", "a c", {"a": 1.0, "c": 1.0})]
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "idx.json"
+        idx = BM25Indexer()
+        idx.build(r1).save(str(path))
+        idx.load(str(path))
+        idx.merge(r2)
+        assert idx._n == 2
+        top_a = idx.query(["a"], top_k=5)
+        assert set(top_a) == {"c1", "c2"}
+        top_c = idx.query(["c"], top_k=5)
+        assert top_c == ["c2"]
+        idx.save(str(path))
+        other = BM25Indexer().load(str(path))
+        assert other._n == 2
+        assert set(other.query(["a"], top_k=5)) == {"c1", "c2"}
+
+
+def test_remove_document_does_not_save() -> None:
+    """C16: remove_document 只更新内存，不写盘；调用方 save 后持久化。"""
+    records = [
+        _record("c1", "a b", {"a": 1.0, "b": 1.0}),
+        _record("c2", "a c", {"a": 1.0, "c": 1.0}),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "idx.json"
+        idx = BM25Indexer()
+        idx.build(records).save(str(path))
+        idx.load(str(path))
+        removed = idx.remove_document(["c1"])
+        assert removed == 1
+        assert idx._n == 1
+        assert idx.query(["a"], top_k=5) == ["c2"]
+        # 未 save，磁盘上仍是 2 条
+        on_disk = BM25Indexer().load(str(path))
+        assert on_disk._n == 2
+        idx.save(str(path))
+        on_disk2 = BM25Indexer().load(str(path))
+        assert on_disk2._n == 1
+        assert on_disk2.query(["a"], top_k=5) == ["c2"]
