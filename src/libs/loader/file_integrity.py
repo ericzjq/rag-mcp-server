@@ -44,6 +44,10 @@ class FileIntegrityChecker(ABC):
         """按 file_path 移除摄取记录（用于文件已删除的场景，如 Dashboard 上传的临时文件）。默认返回 False。"""
         return False
 
+    def clear_all(self) -> int:
+        """清空全部已摄取文件记录，返回删除条数。默认实现可被子类覆盖。"""
+        return 0
+
 
 def _sha256_of_file(path: str) -> str:
     """计算文件 SHA256（十六进制）。"""
@@ -135,3 +139,10 @@ class SQLiteIntegrityChecker(FileIntegrityChecker):
             cur = conn.execute("DELETE FROM ingestion_history WHERE file_path = ?", (file_path,))
             conn.commit()
             return cur.rowcount > 0
+
+    def clear_all(self) -> int:
+        """清空全部已摄取文件记录，返回删除条数。"""
+        with self._get_conn() as conn:
+            cur = conn.execute("DELETE FROM ingestion_history")
+            conn.commit()
+            return cur.rowcount

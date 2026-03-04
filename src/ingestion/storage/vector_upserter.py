@@ -3,7 +3,10 @@ VectorUpserter（C12）：接收 DenseEncoder 的向量输出，生成稳定 chu
 """
 
 import hashlib
+import logging
 from typing import Any, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from core.types import ChunkRecord
 
@@ -12,19 +15,22 @@ from libs.vector_store.base_vector_store import BaseVectorStore, VectorStoreReco
 
 def compute_stable_id(record: ChunkRecord) -> str:
     """
-    生成确定性 chunk_id：hash(source_path + chunk_index + content_hash[:8])。
-
-    从 record.metadata 取 source_path、chunk_index，对 record.text 做 SHA256 取前 8 字符为 content_hash，
-    再对拼接串做 SHA256 取 hex 作为 id。
+    生成确定性 chunk_id，与 file_hash 去重一致：
+    - 若有 file_hash：id = SHA256(file_hash + chunk_index)，同一文件任意 path 得到相同 id。
+    - 否则回退：id = SHA256(source_path + chunk_index + content_hash[:8])，兼容未写 file_hash 的旧逻辑。
     """
     meta = record.metadata or {}
-    source_path = str(meta.get("source_path", ""))
+    file_hash = meta.get("file_hash")
     chunk_index = meta.get("chunk_index")
     if chunk_index is None:
         chunk_index = 0
     else:
         chunk_index = int(chunk_index)
-    content_hash = hashlib.sha256(record.text.encode("utf-8")).hexdigest()[:8]
+    if file_hash:
+        key = f"{file_hash}{chunk_index}"
+        return hashlib.sha256(key.encode("utf-8")).hexdigest()
+    source_path = str(meta.get("source_path", ""))
+    content_hash = hashlib.sha256((record.text or "").encode("utf-8")).hexdigest()[:8]
     key = f"{source_path}{chunk_index}{content_hash}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
@@ -52,6 +58,19 @@ class VectorUpserter:
         """
         if not records:
             return []
+        # 按 file_hash / source_path 删除旧 chunk，保证同文件只保留一份（file_hash）、同 path 幂等（source_path）
+        first_meta = records[0].metadata or {}
+        file_hash = first_meta.get("file_hash")
+        source_path = first_meta.get("source_path")
+        if hasattr(self._store, "delete_by_metadata"):
+            if file_hash:
+                deleted = self._store.delete_by_metadata({"file_hash": file_hash})
+                if deleted:
+                    logger.info("按 file_hash 删除旧 chunk 数量: %d", deleted)
+            if source_path:
+                deleted_path = self._store.delete_by_metadata({"source_path": source_path})
+                if deleted_path:
+                    logger.info("按 source_path 删除旧 chunk 数量: %d", deleted_path)
         store_records: List[VectorStoreRecord] = []
         ids: List[str] = []
         for r in records:

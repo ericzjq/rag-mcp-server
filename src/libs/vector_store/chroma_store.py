@@ -161,6 +161,28 @@ class ChromaStore(BaseVectorStore):
         coll.delete(ids=ids)
         return len(ids)
 
+    def delete_ids(self, ids: List[str]) -> int:
+        """按 id 列表删除记录，返回删除条数。"""
+        if not ids:
+            return 0
+        coll = self._get_collection()
+        coll.delete(ids=ids)
+        return len(ids)
+
+    def get_all(self, limit: int = 50000) -> List[Dict[str, Any]]:
+        """拉取集合内全部记录（id、text、metadata），用于按内容去重等。"""
+        coll = self._get_collection()
+        result = coll.get(limit=limit, include=["documents", "metadatas"])
+        id_list = result.get("ids") or []
+        documents = result.get("documents") or []
+        metadatas = result.get("metadatas") or []
+        out: List[Dict[str, Any]] = []
+        for i, vid in enumerate(id_list):
+            text = (documents[i] if i < len(documents) else "") or ""
+            meta = (metadatas[i] if i < len(metadatas) else None) or {}
+            out.append({"id": vid, "text": text, "metadata": meta})
+        return out
+
     def _to_chroma_where(self, filters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """将简单 filters 转为 Chroma where 格式（标量等值）。"""
         if not filters:

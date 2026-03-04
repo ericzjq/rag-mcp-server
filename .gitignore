@@ -54,3 +54,9 @@ INTERVIEW.md
 
 # 测试用 PDF（勿提交）
 tests/fixtures/sample_documents/*.pdf
+*.pdf
+
+# 运行时 DB 与索引
+data/db/*.db-shm
+data/db/*.db-wal
+data/db/bm25/

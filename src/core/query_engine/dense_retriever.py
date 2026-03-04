@@ -2,6 +2,7 @@
 DenseRetriever（D2）：query 向量化 + VectorStore 检索，返回 RetrievalResult 列表。
 """
 
+import time
 from typing import Any, List, Optional
 
 from core.settings import Settings
@@ -48,10 +49,18 @@ class DenseRetriever:
         """
         if not (query or "").strip():
             return []
+        t0 = time.perf_counter()
         vectors = self._embedding.embed([query.strip()], trace=trace)
+        t1 = time.perf_counter()
         if not vectors:
             return []
         items = self._store.query(vectors[0], top_k, filters=filters, trace=trace)
+        t2 = time.perf_counter()
+        if trace is not None:
+            trace.record_stage("dense_retrieval_breakdown", {
+                "embed_ms": round((t1 - t0) * 1000, 2),
+                "query_ms": round((t2 - t1) * 1000, 2),
+            })
         return [
             RetrievalResult(
                 chunk_id=item["id"],

@@ -92,10 +92,11 @@ class IngestionPipeline:
         if not path or not Path(path).exists():
             raise FileNotFoundError(f"文档不存在: {path}")
 
-        # 1. Integrity
-        if self._integrity is not None and not force:
+        # 1. Integrity + 计算 file_hash（用于后续按内容去重：同一文件不同 path 只保留最新一次）
+        file_hash = None
+        if self._integrity is not None:
             file_hash = self._integrity.compute_sha256(path)
-            if self._integrity.should_skip(file_hash):
+            if not force and self._integrity.should_skip(file_hash):
                 logger.info("跳过已摄取文件 (hash=%s): %s", file_hash[:8], path)
                 return {"skipped": True, "file_hash": file_hash[:16]}
 
@@ -103,6 +104,12 @@ class IngestionPipeline:
         logger.info("加载文档: %s", path)
         t0 = time.perf_counter()
         document = self._loader.load(path)
+        if file_hash is not None:
+            document = Document(
+                id=document.id,
+                text=document.text,
+                metadata={**document.metadata, "file_hash": file_hash},
+            )
         trace.record_stage("load", {
             "document_id": document.id,
             "method": type(self._loader).__name__.lower().replace("loader", "") or "loader",
@@ -133,8 +140,7 @@ class IngestionPipeline:
             logger.warning("文档分块为空: %s", path)
             if on_progress is not None:
                 on_progress("split", 0, 0)
-            if self._integrity is not None and not force:
-                file_hash = self._integrity.compute_sha256(path)
+            if self._integrity is not None and not force and file_hash is not None:
                 self._integrity.mark_success(file_hash, path)
             trace.finish()
             return {"document_id": document.id, "chunks_count": 0, "records_count": 0}
@@ -164,8 +170,12 @@ class IngestionPipeline:
         if on_progress is not None:
             on_progress("embed", 0, len(chunks))
         logger.info("编码: %d chunks", len(chunks))
+        # 部分 embedding 接口单次请求条数有限制（如 Qwen 最多 10 条）
+        effective_batch = batch_size
+        if getattr(self._settings.embedding, "provider", "") == "qwen":
+            effective_batch = min(batch_size, 10)
         t3 = time.perf_counter()
-        records = self._batch_processor.process(chunks, batch_size=batch_size, trace=trace)
+        records = self._batch_processor.process(chunks, batch_size=effective_batch, trace=trace)
         trace.record_stage("embed", {
             "records_count": len(records),
             "method": getattr(self._settings.embedding, "provider", "embedding"),
@@ -193,7 +203,8 @@ class IngestionPipeline:
             on_progress("upsert", 1, 1)
 
         if self._integrity is not None and not force:
-            file_hash = self._integrity.compute_sha256(path)
+            if file_hash is None:
+                file_hash = self._integrity.compute_sha256(path)
             self._integrity.mark_success(file_hash, path)
 
         trace.finish()
